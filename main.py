@@ -29,4 +29,10 @@ if __name__ == "__main__":
     plt.plot(ema_list)
     plt.show()
 
+if __name__ == "__main__":
+    print("Hello World!")
+
+
+
+
 
