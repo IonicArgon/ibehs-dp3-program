@@ -6,3 +6,5 @@ import asyncio
 
 async def main():
     raise NotImplementedError
+
+asyncio.run(main())
