@@ -9,18 +9,17 @@ import asyncio
 import matplotlib.pyplot as plt
 from collections import deque 
 
-async def main():
-    orientation = Orientation(0.9, 10, 2)
-    ema_out_x = deque(maxlen=100)
-    ema_out_y = deque(maxlen=100)
-    ema_out_z = deque(maxlen=100)
+# globals
+orientation = Orientation(0.9, 10, 2)
+ema_out_x = deque(maxlen=100)
+ema_out_y = deque(maxlen=100)
+ema_out_z = deque(maxlen=100)
 
-    print("starting orientation update task")
-
-    loop = asyncio.get_running_loop()
-    loop.create_task(orientation.update(orientation))
-    
-    print("orientation update task started")
+async def plotter():
+    global orientation
+    global ema_out_x
+    global ema_out_y
+    global ema_out_z
 
     while True:
         ema_out = await orientation.get()
@@ -41,6 +40,9 @@ async def main():
         plt.pause(0.1)
         plt.clf()
         print("plot updated")
+
+async def main():
+    asyncio.gather(orientation.update(), plotter())
 
 if __name__ == "__main__":
     asyncio.run(main())
