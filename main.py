@@ -42,7 +42,7 @@ async def plotter():
         print("plot updated")
 
 async def main():
-    asyncio.gather(orientation.update(), plotter())
+    asyncio.gather(*orientation.update(), plotter())
 
 if __name__ == "__main__":
     asyncio.run(main())
