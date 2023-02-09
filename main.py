@@ -18,7 +18,8 @@ async def test_orientation():
 
     print("starting orientation update task")
     loop = asyncio.get_running_loop()
-    loop.run_forever(orientation.update())
+    loop.create_task(orientation.update())
+    loop.run_forever()
     print("orientation update task started")
 
     while True:
