@@ -17,12 +17,14 @@ async def test_orientation():
     ema_out_z = deque(maxlen=100)
 
     await asyncio.gather(orientation.update())
+    print("orientation update task started"")
 
     while True:
         ema_out = await orientation.get()
         ema_out_x.append(ema_out[0])
         ema_out_y.append(ema_out[1])
         ema_out_z.append(ema_out[2])
+        print("x: ", ema_out[0], " y: ", ema_out[1], " z: ", ema_out[2]")
 
         plt.plot(ema_out_x, label="x")
         plt.plot(ema_out_y, label="y")
@@ -35,9 +37,11 @@ async def test_orientation():
         plt.draw()
         plt.pause(0.1)
         plt.clf()
+        print("plot updated")
 
 async def main():
-    await test_orientation()
+    print("starting main")
+    asyncio.create_task(test_orientation())
 
 if __name__ == "__main__":
     asyncio.run(main())
