@@ -7,19 +7,19 @@ import asyncio
 
 # imports for testing
 import matplotlib.pyplot as plt
-from collections import deque
+from collections import deque 
 
-# test code to try out the orientation code
-async def test_orientation():
+async def main():
     orientation = Orientation(0.9, 10, 2)
     ema_out_x = deque(maxlen=100)
     ema_out_y = deque(maxlen=100)
     ema_out_z = deque(maxlen=100)
 
     print("starting orientation update task")
+
     loop = asyncio.get_running_loop()
     loop.create_task(orientation.update())
-    loop.run_forever()
+    
     print("orientation update task started")
 
     while True:
@@ -41,10 +41,6 @@ async def test_orientation():
         plt.pause(0.1)
         plt.clf()
         print("plot updated")
-
-async def main():
-    print("starting main")
-    await test_orientation()
 
 if __name__ == "__main__":
     asyncio.run(main())
