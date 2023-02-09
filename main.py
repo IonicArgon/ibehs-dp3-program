@@ -18,7 +18,7 @@ async def main():
     print("starting orientation update task")
 
     loop = asyncio.get_running_loop()
-    loop.create_task(orientation.update())
+    loop.create_task(orientation.update(orientation))
     
     print("orientation update task started")
 
