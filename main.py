@@ -16,7 +16,9 @@ async def test_orientation():
     ema_out_y = deque(maxlen=100)
     ema_out_z = deque(maxlen=100)
 
-    await asyncio.gather(orientation.update())
+    print("starting orientation update task")
+    loop = asyncio.get_running_loop()
+    loop.run_forever(orientation.update())
     print("orientation update task started")
 
     while True:
