@@ -2,4 +2,4 @@
 
 class Vibration():
     def __init__(self):
-        ...
+        raise NotImplementedError
