@@ -41,7 +41,7 @@ async def test_orientation():
 
 async def main():
     print("starting main")
-    asyncio.create_task(test_orientation())
+    await test_orientation()
 
 if __name__ == "__main__":
     asyncio.run(main())
