@@ -16,7 +16,6 @@ class Orientation():
         self.m_ema_out = (None, None, None)
         self.m_lock = threading.Lock()
 
-        
         thread = threading.Thread(target=self.update)
         thread.start()
 
