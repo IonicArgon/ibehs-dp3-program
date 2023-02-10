@@ -3,26 +3,21 @@ from hardware.steppers import Steppers
 from hardware.vibration import Vibration
 
 # important imports
-import asyncio
+# import threading
+# import time
 
 # imports for testing
 import matplotlib.pyplot as plt
 from collections import deque 
 
-# globals
-orientation = Orientation(0.9, 10, 2)
-ema_out_x = deque(maxlen=100)
-ema_out_y = deque(maxlen=100)
-ema_out_z = deque(maxlen=100)
-
-async def plotter():
-    global orientation
-    global ema_out_x
-    global ema_out_y
-    global ema_out_z
+def main():
+    orientation = Orientation(0.9, 10, 2)
+    ema_out_x = deque(maxlen=100)
+    ema_out_y = deque(maxlen=100)
+    ema_out_z = deque(maxlen=100)
 
     while True:
-        ema_out = await orientation.get()
+        ema_out = next(orientation.get())
         ema_out_x.append(ema_out[0])
         ema_out_y.append(ema_out[1])
         ema_out_z.append(ema_out[2])
@@ -41,8 +36,5 @@ async def plotter():
         plt.clf()
         print("plot updated")
 
-async def main():
-    asyncio.gather(*orientation.update(), plotter())
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
