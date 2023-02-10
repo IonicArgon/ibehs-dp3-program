@@ -21,7 +21,7 @@ def main():
     ema_raw_y = deque(maxlen=25)
     ema_raw_z = deque(maxlen=25)
 
-    fig, ax = plt.subplots(1)
+    fig, ax = plt.subplots(2)
     fig.suptitle("Orientation Data")
 
     while True:
