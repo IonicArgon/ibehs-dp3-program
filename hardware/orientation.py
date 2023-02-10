@@ -14,21 +14,21 @@ class Orientation():
         ]
         self.m_raw = (None, None, None)
         self.m_ema_out = (None, None, None)
-        # self.m_lock = threading.Lock()
+        self.m_lock = threading.Lock()
 
         thread = threading.Thread(target=self.update)
         thread.start()
 
     def get(self):
-        print("getting orientation")
-        return self.m_ema_out
+        with self.m_lock:
+            return self.m_ema_out
 
     def update(self):
         while True:
-            print("updating orientation")
-            self.m_raw = self.m_sensor.euler_angles()
-            for i in range(3):
-                self.m_ema_xyz[i].update(self.m_raw[i])
-                self.m_ema_out = (self.m_ema_xyz[0].get(), self.m_ema_xyz[1].get(), self.m_ema_xyz[2].get())
-            time.sleep(0.1)
+            with self.m_lock:
+                self.m_raw = self.m_sensor.euler_angles()
+                for i in range(3):
+                    self.m_ema_xyz[i].update(self.m_raw[i])
+                    self.m_ema_out = (self.m_ema_xyz[0].get(), self.m_ema_xyz[1].get(), self.m_ema_xyz[2].get())
+            time.sleep(0.01)
 
