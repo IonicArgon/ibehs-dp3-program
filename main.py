@@ -40,9 +40,9 @@ def main():
         ax[0].set_title("X")
         ax[0].legend()
 
-        plt.draw()
+        fig.draw()
         plt.pause(0.01)
-        plt.clf()
+        fig.clear()
 
 if __name__ == "__main__":
     main()
