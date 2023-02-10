@@ -5,8 +5,8 @@ from hardware.vibration import Vibration
 from lib.sensor_library import Orientation_Sensor
 
 # important imports
-# import threading
-# import time
+import threading
+import time
 
 # imports for testing
 import matplotlib.pyplot as plt
@@ -39,7 +39,9 @@ def main():
     #     print("plot updated")
 
     test = Orientation_Sensor()
-    print(test.euler_angles())
+    while True:
+        print(test.euler_angles())
+        time.sleep(0.1)
 
 if __name__ == "__main__":
     main()
