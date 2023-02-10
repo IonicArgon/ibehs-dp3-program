@@ -26,14 +26,14 @@ def main():
 
     while True:
         ema_out = orientation.get()
-        ema_out_x.append(ema_out[0])
-        ema_out_y.append(ema_out[1])
-        ema_out_z.append(ema_out[2])
+        ema_out_x.append(float(ema_out[0] or 0.0))
+        ema_out_y.append(float(ema_out[1] or 0.0))
+        ema_out_z.append(float(ema_out[2] or 0.0))
 
         ema_raw = orientation.get_raw()
-        ema_raw_x.append(ema_raw[0])
-        ema_raw_y.append(ema_raw[1])
-        ema_raw_z.append(ema_raw[2])
+        ema_raw_x.append(float(ema_raw[0] or 0.0))
+        ema_raw_y.append(float(ema_raw[1] or 0.0))
+        ema_raw_z.append(float(ema_raw[2] or 0.0))
 
         ax[0].plot(ema_out_x, label="EMA")
         ax[0].plot(ema_raw_x, label="Raw")
