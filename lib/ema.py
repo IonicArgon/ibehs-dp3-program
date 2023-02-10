@@ -18,7 +18,7 @@ class EMA:
         return self.m_out
 
     def update(self, p_in):
-        self.m_window.append(p_in)
+        self.m_window.append(float(p_in or 0.0))
         if len(self.m_window) < self.m_window_size:
             self.m_out = None
             return
