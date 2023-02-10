@@ -21,9 +21,6 @@ class Orientation():
     def get(self):
         return self.m_ema_out
 
-    def get_raw(self):
-        return self.m_raw
-
     def update(self):
         while True:
             self.m_raw = self.m_sensor.euler_angles()
