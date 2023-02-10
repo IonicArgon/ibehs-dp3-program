@@ -21,8 +21,10 @@ def main():
     ema_raw_y = deque(maxlen=25)
     ema_raw_z = deque(maxlen=25)
 
-    fig, ax = plt.subplots(2)
+    fig, ax = plt.subplots(3)
     fig.suptitle("Orientation Data")
+
+    plt.ion()
 
     while True:
         ema_out = orientation.get()
@@ -40,9 +42,15 @@ def main():
         ax[0].set_title("X")
         ax[0].legend()
 
-        fig.draw()
+        ax[1].plot(ema_out_y, label="EMA")
+        ax[1].plot(ema_raw_y, label="Raw")
+        ax[1].set_title("Y")
+
+        ax[2].plot(ema_out_z, label="EMA")
+        ax[2].plot(ema_raw_z, label="Raw")
+        ax[2].set_title("Z")
+
         plt.pause(0.01)
-        fig.clear()
 
 if __name__ == "__main__":
     main()
