@@ -24,8 +24,6 @@ def main():
     fig, ax = plt.subplots(3)
     fig.suptitle("Orientation Data")
 
-    plt.ion()
-
     while True:
         ema_out = orientation.get()
         ema_out_x.append(ema_out[0])
@@ -50,6 +48,7 @@ def main():
         ax[2].plot(ema_raw_z, label="Raw")
         ax[2].set_title("Z")
 
+        plt.draw()
         plt.pause(0.01)
 
 if __name__ == "__main__":
