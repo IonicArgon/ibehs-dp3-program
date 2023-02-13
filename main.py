@@ -2,8 +2,6 @@ from hardware.orientation import Orientation
 from hardware.steppers import Steppers 
 from hardware.vibration import Vibration
 
-from lib.sensor_library import Orientation_Sensor
-
 # important imports
 import threading
 import time
