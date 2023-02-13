@@ -16,8 +16,12 @@ class Vibration():
         self.m_buzzer = Buzzer(p_buzzer_pin)
         self.m_head_position = Head_Position.MOVE_STOP
         
-        thread_user_alert = threading.Thread(target=self.user_alert)
-        thread_user_alert.start()
+        self.thread_user_alert = threading.Thread(target=self.user_alert)
+        self.thread_user_alert.daemon = True
+        self.thread_user_alert.start()
+
+    def __del__(self):
+        self.m_buzzer.off()
 
     def set_head_position(self, p_head_position):
         self.m_head_position = p_head_position

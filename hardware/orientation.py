@@ -15,8 +15,12 @@ class Orientation():
         self.m_raw = (None, None, None)
         self.m_ema_out = (None, None, None)
 
-        thread_ema_update = threading.Thread(target=self.update)
-        thread_ema_update.start()
+        self.thread_ema_update = threading.Thread(target=self.update)
+        self.thread_ema_update.daemon = True
+        self.thread_ema_update.start()
+
+    def __del__(self):
+        ...
 
     def get(self):
         return self.m_ema_out
