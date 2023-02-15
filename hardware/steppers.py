@@ -34,16 +34,20 @@ class Steppers():
 def joystick_control(self):
     while True:
         if self.m_head_position == Head_Position.MOVE_FORWARD:
-            kit.stepper2.onestep(direction = stepper.FORWARD, style=stepper.INTERLEAVE)
+            for i in range (#this is amount of steps needed to do this rotation, will figure this out in testing): 
+                kit.stepper2.onestep(direction = stepper.FORWARD, style=stepper.INTERLEAVE)
             
         elif self.m_head_position == Head_Position.MOVE_BACKWARD:
-            kit.stepper2.onestep(direction = stepper.BACKWARD, style=stepper.INTERLEAVE) 
+            for i in range():
+                kit.stepper2.onestep(direction = stepper.BACKWARD, style=stepper.INTERLEAVE) 
             
         elif self.m_head_position == Head_Position.MOVE_RIGHT:
-            kit.stepper1.onestep(direction = stepper.FORWARD, style=stepper.INTERLEAVE) 
+            for i in range(): 
+                kit.stepper1.onestep(direction = stepper.FORWARD, style=stepper.INTERLEAVE) 
             
         elif self.m_head_position == Head_Position.MOVE_LEFT:
-            kit.stepper1.onestep(direction = stepper.BACKWARD, style=stepper.INTERLEAVE) 
+            for i in range(): 
+                kit.stepper1.onestep(direction = stepper.BACKWARD, style=stepper.INTERLEAVE) 
             
 
         
