@@ -1,15 +1,8 @@
 # space for imports later
 from gpiozero import Buzzer
-from enum import Enum
+from lib.gestures import Head_Position
 import time
 import threading
-
-class Head_Position(Enum):
-    MOVE_FORWARD = 1
-    MOVE_BACKWARD = 2
-    MOVE_RIGHT = 3
-    MOVE_LEFT = 4
-    MOVE_STOP = 5
 
 class Vibration():
     def __init__(self, p_buzzer_pin):

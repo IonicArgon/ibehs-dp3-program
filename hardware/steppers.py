@@ -1,61 +1,30 @@
-fr# space for imports later
-
-
-
-
+# space for imports
+from lib.gestures import Head_Position
+from adafruit_motorkit import MotorKit
+from adafruit_motor import stepper
 import time
-import sys
 import threading
-import RPi.GPIO as GPIO
-
-
-stepper_x = #add pin later (this is to move joystick in x direction) 
-stepper_y = #add pin later (this is to move joystick in y direction) 
-CW = 1 #clockwise rotation (in this case, this one will move it forward and to the right)
-CCW = 0 # counterclockwise rotation (in this case, this will move it backwards and to the left) 
-SPR = 48 #steps per revolution (360/7.5)
-step_count = SPR #can be changed to adjust speed 
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(stepper_x, GPIO.OUT)
-GPIO.setup(stepper_y, GPIO.OUT)
-
-
-#this one below sets the direction of the stepper
-#GPIO.output( #stepper, direction) 
+import board
 
 class Steppers():
     def __init__(self):
-        self.thread_joystick_control = threading.Thread (target=self.joystick_control)
-        self.thread_joystick_control.daemon = True
-        self.thread_joystick_control.start()
+        self.m_kit = MotorKit(i2c=board.I2C())
+        self.m_head_position = Head_Position.MOVE_STOP
+        self.m_x = 0
+        self.m_y = 0
 
+        self.thread_steppers = threading.Thread(target=self.update)
+        self.thread_steppers.daemon = True
+        self.thread_steppers.start()
 
-def joystick_control(self):
-    while True:
-        if self.m_head_position == Head_Position.MOVE_FORWARD:
-            for i in range (step_count):
-                GPIO.output(stepper_y,CW)
-                GPIO.output(stepper_y, GPIO.HIGH)
-                
-        elif self.m_head_position == Head_Position.MOVE_BACKWARD:
-            for i in range (step_count):
-                GPIO.output(stepper_y,CCW)
-                GPIO.output(stepper_y, GPIO.HIGH) 
-                
-        elif self.m_head_position == Head_Position.MOVE_RIGHT:
-            for i in range (step_count):
-                GPIO.output(stepper_x,CW)
-                GPIO.output(stepper_y, GPIO.HIGH) 
-                
-        elif self.m_head_position == Head_Position.MOVE_LEFT:
-            for i in range (step_count):
-                GPIO.output(stepper_x,CCW)
-                GPIO.output(stepper_y, GPIO.HIGH) 
-                
-        elif self.m_head_position == Head_Position.MOVE_STOP:
-            GPIO.output(stepper_x, False) #idk if this is the right command
-            GPIO.output(stepper_y, False) 
-                
+    def __del__(self):
+        self.m_kit.stepper1.release()
+        self.m_kit.stepper2.release()
 
-        time.sleep(0.01) 
+    def set_head_position(self, p_head_position):
+        self.m_head_position = p_head_position
+
+    def update(self):
+        raise NotImplementedError
+
+    

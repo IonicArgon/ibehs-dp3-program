@@ -6,10 +6,12 @@ from hardware.vibration import Head_Position
 # important imports
 import threading
 import time
+import sys
 
 def main():
-    orientation = Orientation(0.9, 10, 2)
-    vibration = Vibration(17)
+    # orientation = Orientation(0.9, 10, 2)
+    # vibration = Vibration(17)
+    ...
 
 if __name__ == "__main__":
     main()
