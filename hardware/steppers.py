@@ -6,6 +6,7 @@ import time
 import threading
 import board
 
+
 class Steppers():
     def __init__(self):
         self.m_kit = MotorKit(i2c=board.I2C())
@@ -27,4 +28,23 @@ class Steppers():
     def update(self):
         raise NotImplementedError
 
+#stepper 1 will be the one controlling the mechanism in the x direction
+#stepper 2 will be the one controlloing the mechanism in the y direction
     
+def joystick_control(self):
+    while True:
+        if self.m_head_position == Head_Position.MOVE_FORWARD:
+            kit.stepper2.onestep(direction = stepper.FORWARD, style=stepper.INTERLEAVE)
+            
+        elif self.m_head_position == Head_Position.MOVE_BACKWARD:
+            kit.stepper2.onestep(direction = stepper.BACKWARD, style=stepper.INTERLEAVE) 
+            
+        elif self.m_head_position == Head_Position.MOVE_RIGHT:
+            kit.stepper1.onestep(direction = stepper.FORWARD, style=stepper.INTERLEAVE) 
+            
+        elif self.m_head_position == Head_Position.MOVE_LEFT:
+            kit.stepper1.onestep(direction = stepper.BACKWARD, style=stepper.INTERLEAVE) 
+            
+
+        
+        
