@@ -12,8 +12,8 @@ class Orientation():
             EMA(p_alpha, p_window_size, p_round),
             EMA(p_alpha, p_window_size, p_round)
         ]
-        self.m_raw = (None, None, None)
-        self.m_ema_out = (None, None, None)
+        self.m_raw = [None, None, None]
+        self.m_ema_out = [None, None, None]
 
         self.thread_ema_update = threading.Thread(target=self.update)
         self.thread_ema_update.daemon = True
