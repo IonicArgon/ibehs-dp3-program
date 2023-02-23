@@ -1,0 +1,34 @@
+{
+    "gestures" : {
+        "move_forward" : {
+            "__enum__" : 0,
+            "direction" : [0, -1, 0],
+            "count" : 1,
+            "threshold" : -10.0
+        },
+        "move_backward" : {
+            "__enum__" : 1,
+            "direction" : [0, 1, 0],
+            "count" : 1,
+            "threshold" : -20.0
+        },
+        "move_right" : {
+            "__enum__" : 2,
+            "direction" : [0, 0, -1],
+            "count" : 1,
+            "threshold" : -25.0
+        },
+        "move_left" : {
+            "__enum__" : 3,
+            "direction" : [0, 0, 1],
+            "count" : 1,
+            "threshold" : 25.0
+        },
+        "move_stop" : {
+            "__enum__" : 4,
+            "direction" : [0, 0, -1],
+            "count" : 2,
+            "threshold" : -25.0
+        }
+    }
+}
