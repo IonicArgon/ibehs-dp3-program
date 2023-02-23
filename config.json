@@ -16,19 +16,13 @@
             "__enum__" : 2,
             "direction" : [0, 0, -1],
             "count" : 1,
-            "threshold" : -30.0
+            "threshold" : -25.0
         },
         "move_left" : {
             "__enum__" : 3,
             "direction" : [0, 0, 1],
             "count" : 1,
             "threshold" : 25.0
-        },
-        "move_stop" : {
-            "__enum__" : 4,
-            "direction" : [0, 0, -1],
-            "count" : 1,
-            "threshold" : -20.0
         }
     }
 }
