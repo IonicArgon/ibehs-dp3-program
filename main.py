@@ -10,7 +10,7 @@ import sys
 
 def main():
     orientation = Orientation(0.9, 10, 2)
-    gestures = Gestures("config.json", 5.0)
+    gestures = Gestures("config.json", 1.0)
 
     while True:
         orientation_xyz = orientation.get()
