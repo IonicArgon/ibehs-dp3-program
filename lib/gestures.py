@@ -85,10 +85,16 @@ class Gestures():
                     threshold_test = (abs(vector) > abs(gesture["threshold"]))
                     
                     if direction_test and threshold_test:
-                        # only increment on falling edge
+                        # increment once on new falling edge
                         if self.m_count == 0:
                             self.m_count += 1
-                            print(f'[GEST] Gesture count: {self.m_count}')
+                            print(f'[GEST] Count: {self.m_count}')
+                        
+                        # case for stop gesture (count = 2)
+                        if gesture["count"] == 2:
+                            self.m_count += 1
+                            print(f'[GEST] Count: {self.m_count}')
+
                         break
 
                 self.m_internal_orientation = {
