@@ -52,9 +52,6 @@ class Gestures():
         return self.m_head_position
 
     def set_xyz(self, p_xyz):
-        # check if p_xyz is none
-        if p_xyz == [None, None, None]:
-            self.m_internal_xyz = [0, 0, 0]
         self.m_internal_xyz = p_xyz
 
     def update_internal_values(self):
@@ -67,6 +64,8 @@ class Gestures():
             else:
                 for i in range(1, 3):
                     vector = self.m_internal_xyz[i]
+                    vector = vector if vector is not None else 0
+
                     if abs(vector) > abs(self.m_prev_vector):
                         self.m_largest_direction_xyz = [0, 0, 0]
                         self.m_largest_direction_xyz[i] = 1
