@@ -54,8 +54,8 @@ class Gestures():
     def set_xyz(self, p_xyz):
         # check if p_xyz is none
         if p_xyz == [None, None, None]:
-            self.m_internal_orientation = [0, 0, 0]
-        self.m_internal_orientation = p_xyz
+            self.m_internal_xyz = [0, 0, 0]
+        self.m_internal_xyz = p_xyz
 
     def update_internal_values(self):
         while True:
@@ -66,7 +66,7 @@ class Gestures():
                 print("[GEST] Internal values reset")
             else:
                 for i in range(1, 3):
-                    vector = self.m_internal_orientation[i]
+                    vector = self.m_internal_xyz[i]
                     if abs(vector) > abs(self.m_prev_vector):
                         self.m_largest_direction_xyz = [0, 0, 0]
                         self.m_largest_direction_xyz[i] = 1
@@ -76,7 +76,7 @@ class Gestures():
                 for i in self.m_gestures:
                     gesture = self.m_gestures[i]
                     direction_test = (gesture["direction"] == self.m_largest_direction_xyz)
-                    threshold_test = (abs(self.m_internal_orientation[gesture["direction"].index(1)]) > abs(gesture["threshold"]))
+                    threshold_test = (abs(self.m_internal_xyz[gesture["direction"].index(1)]) > abs(gesture["threshold"]))
                     
                     if direction_test and threshold_test:
                         # only increment on rising edge case of threshold test
