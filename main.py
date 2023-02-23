@@ -1,7 +1,7 @@
 from hardware.orientation import Orientation
 # from hardware.steppers import Steppers 
 # from hardware.vibration import Vibration
-from hardware.vibration import Head_Position
+from lib.gestures import Gestures
 
 # important imports
 import threading
@@ -10,9 +10,13 @@ import sys
 
 def main():
     orientation = Orientation(0.9, 10, 2)
+    gestures = Gestures("config.json", 5.0)
 
     while True:
-        print(orientation.get())
+        orientation_xyz = orientation.get()
+        gestures.set_xyz(orientation_xyz)
+        print(orientation_xyz)
+        print(gestures.get())
         time.sleep(0.01)
 
 if __name__ == "__main__":

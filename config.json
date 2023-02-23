@@ -10,7 +10,7 @@
             "__enum__" : 1,
             "direction" : [0, 1, 0],
             "count" : 1,
-            "threshold" : -20.0
+            "threshold" : -10.0
         },
         "move_right" : {
             "__enum__" : 2,

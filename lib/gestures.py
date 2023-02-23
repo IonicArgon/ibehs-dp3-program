@@ -85,7 +85,7 @@ class Gestures():
                     "direction": self.m_largest_direction_xyz,
                     "count": self.m_count
                 }
-            time.sleep(0.1)
+            time.sleep(0.01)
 
     def update_gesture_output(self):
         while self.m_update_gesture_thread_running:
@@ -108,8 +108,4 @@ class Gestures():
                 if direction_test and count_test:
                     self.m_head_position = Head_Position(i)
                     break
-            time.sleep(0.1)
-
-if __name__ == "__main__":
-    gestures = Gestures('config.json', 5.0)
-    time.sleep(10)
+            time.sleep(0.01)
