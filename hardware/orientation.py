@@ -31,5 +31,5 @@ class Orientation():
             for i in range(3):
                 self.m_ema_xyz[i].update(self.m_raw[i])
                 self.m_ema_out = (self.m_ema_xyz[0].get(), self.m_ema_xyz[1].get(), self.m_ema_xyz[2].get())
-            time.sleep(0.01)
+            time.sleep(0.1)
 
