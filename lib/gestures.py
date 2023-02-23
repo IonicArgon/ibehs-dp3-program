@@ -82,7 +82,12 @@ class Gestures():
                     vector_index = gesture["direction"].index(1) if 1 in gesture["direction"] else gesture["direction"].index(-1)
                     vector = self.m_internal_xyz[vector_index]
                     vector = vector if vector is not None else 0
-                    threshold_test = (abs(vector) > abs(gesture["threshold"]))
+
+                    threshold_test = None
+                    if gesture["direction"][vector_index] == 1:
+                        threshold_test = (vector > gesture["threshold"])
+                    else:
+                        threshold_test = (vector < gesture["threshold"])
                     
                     if direction_test and threshold_test:
                         # increment once on new falling edge
