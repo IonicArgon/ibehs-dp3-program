@@ -8,8 +8,8 @@ import math
 class Head_Position(IntEnum):
     MOVE_FORWARD    = 0
     MOVE_BACKWARD   = 1
-    MOVE_LEFT       = 2
-    MOVE_RIGHT      = 3 
+    MOVE_RIGHT      = 2
+    MOVE_LEFT       = 3 
     MOVE_STOP       = 4
 
 class Gestures():
@@ -92,11 +92,6 @@ class Gestures():
                     if direction_test and threshold_test:
                         # increment once on new falling edge
                         if self.m_count == 0:
-                            self.m_count += 1
-                            print(f'[GEST] Count: {self.m_count}')
-                        
-                        # case for stop gesture (count = 2)
-                        if gesture["count"] == 2:
                             self.m_count += 1
                             print(f'[GEST] Count: {self.m_count}')
 
