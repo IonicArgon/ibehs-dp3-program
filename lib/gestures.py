@@ -61,6 +61,7 @@ class Gestures():
                 self.m_prev_vector = 0
                 self.m_count = 0
                 print("[GEST] Internal values reset")
+
             else:
                 for i in range(1, 3):
                     vector = self.m_internal_xyz[i]
@@ -68,7 +69,7 @@ class Gestures():
 
                     if abs(vector) > abs(self.m_prev_vector):
                         self.m_largest_direction_xyz = [0, 0, 0]
-                        self.m_largest_direction_xyz[i] = 1
+                        self.m_largest_direction_xyz[i] = math.copysign(1, vector)
                         self.m_prev_vector = vector
                         print(f'[GEST] Largest direction: {self.m_largest_direction_xyz}')
 
@@ -120,4 +121,5 @@ class Gestures():
                     self.m_head_position = Head_Position(i)
                     print(f'[GEST] New head position: {self.m_head_position}')
                     break
+
             time.sleep(0.1)
