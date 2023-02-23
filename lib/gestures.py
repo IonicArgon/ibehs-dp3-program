@@ -75,7 +75,10 @@ class Gestures():
                 for i in self.m_gestures:
                     gesture = self.m_gestures[i]
                     direction_test = (gesture["direction"] == self.m_largest_direction_xyz)
-                    threshold_test = (abs(self.m_internal_xyz[gesture["direction"].index(1)]) > abs(gesture["threshold"]))
+
+                    vector = self.m_internal_xyz[gesture["direction"].index(1)]
+                    vector = vector if vector is not None else 0
+                    threshold_test = (abs(vector) > abs(gesture["threshold"]))
                     
                     if direction_test and threshold_test:
                         # only increment on rising edge case of threshold test
