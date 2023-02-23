@@ -27,7 +27,7 @@ class Gestures():
 
         # internal values
         self.m_head_position = Head_Position.MOVE_STOP
-        self.m_internal_orientation = [0, 0, 0]
+        self.m_internal_orientation = {}
         self.m_internal_xyz = [0, 0, 0]
         self.m_largest_direction_xyz = [0, 0, 0]
         self.m_prev_vector = 0
