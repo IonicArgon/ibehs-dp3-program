@@ -75,9 +75,12 @@ class Gestures():
 
                 for i in self.m_gestures:
                     gesture = self.m_gestures[i]
+
                     direction_test = (gesture["direction"] == self.m_largest_direction_xyz)
 
-                    vector = self.m_internal_xyz[gesture["direction"].index(1)]
+                    # get index of 1 or -1 in gesture
+                    vector_index = gesture["direction"].index(1) if 1 in gesture["direction"] else gesture["direction"].index(-1)
+                    vector = self.m_internal_xyz[vector_index]
                     vector = vector if vector is not None else 0
                     threshold_test = (abs(vector) > abs(gesture["threshold"]))
                     
