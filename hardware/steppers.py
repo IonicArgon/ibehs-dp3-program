@@ -41,6 +41,8 @@ class Stepper_Driver():
         return self.m_steps
     
     def step(self, p_steps):
+        default_reverse = self.m_reverse
+
         if p_steps < 0:
             self.m_reverse = True
         elif p_steps > 0:
@@ -64,6 +66,8 @@ class Stepper_Driver():
             
             self.m_steps += 1
             time.sleep(self.m_step_time)
+
+        self.m_reverse = default_reverse
 
 class Stepper_Gesture():
     def __init__(self, p_stepper_drive1, p_stepper_drive2, p_update_speed):
