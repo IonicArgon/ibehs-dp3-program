@@ -54,7 +54,8 @@ class Stepper_Driver():
             positive_test = self.m_steps > self.m_c_STEPPER_MAX_STEPS
             negative_test = self.m_steps < -self.m_c_STEPPER_MAX_STEPS
             if positive_test or negative_test:
-                raise Exception(f'[Stepper_Driver] Max steps reached: {self.m_steps}')
+                print(f'[Stepper_Driver] Max steps reached: {self.m_steps}')
+                break
 
             for pin in range(4):
                 GPIO.output(self.m_pins[pin], self.m_c_STEPPER_STEP_SEQUENCE[self.m_sequence][pin])
