@@ -15,8 +15,6 @@ class GUI:
         self.canvas = Canvas(self.root, width=400, height=400, bg="white")
         self.canvas.pack()
 
-    
-
     def run(self):
         self.root.mainloop()
 

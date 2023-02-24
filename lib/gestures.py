@@ -50,6 +50,18 @@ class Gestures():
 
     def get(self):
         return self.m_head_position
+    
+    def get_status(self):
+        if self.m_head_position == Head_Position.MOVE_FORWARD:
+            return "FORWARD"
+        elif self.m_head_position == Head_Position.MOVE_BACKWARD:
+            return "BACKWARD"
+        elif self.m_head_position == Head_Position.MOVE_RIGHT:
+            return "RIGHT"
+        elif self.m_head_position == Head_Position.MOVE_LEFT:
+            return "LEFT"
+        elif self.m_head_position == Head_Position.MOVE_STOP:
+            return "STOP"
 
     def set_xyz(self, p_xyz):
         self.m_internal_xyz = p_xyz
@@ -60,7 +72,6 @@ class Gestures():
                 self.m_largest_direction_xyz = [0, 0, 0]
                 self.m_prev_vector = 0
                 self.m_count = 0
-                print("[GEST] Internal values reset")
 
             else:
                 for i in range(1, 3):
@@ -71,7 +82,6 @@ class Gestures():
                         self.m_largest_direction_xyz = [0, 0, 0]
                         self.m_largest_direction_xyz[i] = math.copysign(1, vector)
                         self.m_prev_vector = vector
-                        print(f'[GEST] Largest direction: {self.m_largest_direction_xyz}')
 
                 for i in self.m_gestures:
                     gesture = self.m_gestures[i]
@@ -102,24 +112,20 @@ class Gestures():
                     "count": self.m_count
                 }
 
-                print(f'[GEST] Internal orientation: {self.m_internal_orientation}')
             time.sleep(0.1)
 
     def update_gesture_output(self):
         while self.m_update_gesture_thread_running:
             # update internal values
-            print("[GEST] Updating internal values")
             self.m_update_internal_thread_running = True
             time.sleep(self.m_gesture_window_len)
             self.m_update_internal_thread_running = False
-            print(f'[GEST] Internal values: {self.m_internal_orientation}')
 
             # set the default position
             self.m_head_position = Head_Position.MOVE_STOP
 
             for i in self.m_gestures:
                 if self.m_internal_orientation == None:
-                    print("[GEST] No internal orientation found")
                     break
 
                 gesture = self.m_gestures[i]
@@ -128,7 +134,6 @@ class Gestures():
 
                 if direction_test and count_test:
                     self.m_head_position = Head_Position(i)
-                    print(f'[GEST] New head position: {self.m_head_position}')
                     break
 
             time.sleep(0.1)
