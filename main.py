@@ -2,7 +2,7 @@ from hardware.orientation import Orientation
 from hardware.steppers import Stepper_Driver, Stepper_Gesture
 from hardware.vibration import Vibration
 from lib.gestures import Gestures
-from RPi.GPIO import GPIO # type: ignore[import]
+import RPi.GPIO as GPIO # type: ignore[import]
 
 # important imports
 import threading
