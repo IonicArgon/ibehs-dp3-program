@@ -49,13 +49,14 @@ class Stepper_Driver():
             self.m_reverse = False
         else:
             raise Exception(f'[Stepper_Driver] Invalid step value: {p_steps}')
+            
+        # check to see if the next command will exceed the max steps
+        if abs(self.m_steps + p_steps) > self.m_c_STEPPER_MAX_STEPS:
+            print(f'[Stepper_Driver] Max steps exceeded: {self.m_steps + p_steps} > {self.m_c_STEPPER_MAX_STEPS}')
+            self.m_reverse = default_reverse
+            return
 
         for _ in range(abs(p_steps)):
-            # check to see if the next command will exceed the max steps
-            if abs(self.m_steps + p_steps) > self.m_c_STEPPER_MAX_STEPS:
-                print(f'[Stepper_Driver] Max steps exceeded: {self.m_steps + p_steps} > {self.m_c_STEPPER_MAX_STEPS}')
-                break
-
             for pin in range(4):
                 GPIO.output(self.m_pins[pin], self.m_c_STEPPER_STEP_SEQUENCE[self.m_sequence][pin])
             if self.m_reverse:
