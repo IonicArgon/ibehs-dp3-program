@@ -22,6 +22,11 @@ def console_output_fn():
     subheader = f'{" ":^15}|{"X":^5}{"Y":^5}{"Z":^5}|{" ":^15}|{"X":^5}{"Z":^5}{" ":^5}|{" ":^15}'
     header_counter = 0
 
+    global orientation
+    global gestures
+    global stepper_ctrl
+    global vibration
+
     while True:
         if header_counter % 10 == 0:
             for _ in range(len(header)):
