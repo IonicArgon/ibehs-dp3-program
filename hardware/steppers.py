@@ -44,6 +44,9 @@ class Stepper_Driver():
     def get_steps(self):
         return self.m_steps
     
+    def set_reverse(self, p_reverse):
+        self.m_reverse = p_reverse
+    
     def step(self, p_steps):
         for _ in range(p_steps):
             for pin in range(4):
