@@ -51,7 +51,7 @@ class Stepper_Driver():
             raise Exception(f'[Stepper_Driver] Invalid step value: {p_steps}')
 
         for _ in range(abs(p_steps)):
-            if self.m_steps > self.m_c_STEPPER_MAX_STEPS:
+            if abs(self.m_steps) > self.m_c_STEPPER_MAX_STEPS:
                 print(f'[Stepper_Driver] Max steps reached: {self.m_c_STEPPER_MAX_STEPS}')
                 break
 
