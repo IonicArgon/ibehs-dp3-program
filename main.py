@@ -2,6 +2,7 @@ from hardware.orientation import Orientation
 from hardware.steppers import Stepper_Driver, Stepper_Gesture
 from hardware.vibration import Vibration
 from lib.gestures import Gestures
+from RPi.GPIO import GPIO # type: ignore[import]
 
 # important imports
 import threading
@@ -72,6 +73,7 @@ def main():
     test_stepper = Stepper_Driver([0, 5, 6, 13], 0.002, False)
     test_stepper.step(int(-(4096 / 4)))
     time.sleep(5)
+    GPIO.cleanup()
 
 if __name__ == "__main__":
     main()
