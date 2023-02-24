@@ -70,9 +70,7 @@ def main():
 
 def main():
     test_stepper = Stepper_Driver([0, 5, 6, 13], 0.002, False)
-    test_stepper.step(int(4096 / 2))
-    time.sleep(5)
-    test_stepper.step(int(-(4096 / 2)))
+    test_stepper.step(int(-(4096 / 4)))
     time.sleep(5)
 
 if __name__ == "__main__":
