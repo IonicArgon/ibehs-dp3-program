@@ -112,7 +112,7 @@ class Stepper_Gesture():
             
 # for testing purposes
 if __name__ == '__main__':
-    sys.path.append('..')
+    sys.path.append('../**')
 
     test_stepper = Stepper_Driver([0, 5, 6, 13], 0.002, False)
     test_stepper.step(4096 / 2)
