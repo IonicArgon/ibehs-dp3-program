@@ -41,9 +41,10 @@ class Stepper_Driver():
         return self.m_steps
     
     def step(self, p_steps):
-        for i in range(p_steps):
+        for _ in range(p_steps):
             for pin in range(4):
                 GPIO.output(self.m_pins[pin], self.m_c_STEPPER_STEP_SEQUENCE[self.m_sequence][pin])
+            print(f'[Stepper_Driver] Step: {self.m_sequence}')
             if self.m_reverse:
                 self.m_sequence = (self.m_sequence - 1) % 8
             elif not self.m_reverse:
