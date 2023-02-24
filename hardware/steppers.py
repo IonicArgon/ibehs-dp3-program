@@ -32,10 +32,14 @@ class Stepper_Driver():
             [0, 0, 0, 1]
         ]
 
+        print(f'[Stepper_Driver] Initialized with pins: {self.m_pins}')
+
     def __del__(self):
         for pin in self.m_pins:
             GPIO.output(pin, GPIO.LOW)
         GPIO.cleanup(self.m_pins)
+
+        print(f'[Stepper_Driver] Cleaned up pins: {self.m_pins}')
 
     def get_steps(self):
         return self.m_steps
