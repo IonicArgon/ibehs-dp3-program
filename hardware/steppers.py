@@ -20,7 +20,7 @@ class Stepper_Driver():
             GPIO.output(pin, GPIO.LOW)
 
         # constants
-        self.m_c_STEPPER_STEPS_PER_ROTATION = 4096
+        self.m_c_STEPPER_MAX_STEPS = 1024
         self.m_c_STEPPER_STEP_SEQUENCE = [
             [1, 0, 0, 1],
             [1, 0, 0, 0],
@@ -32,26 +32,29 @@ class Stepper_Driver():
             [0, 0, 0, 1]
         ]
 
-        print(f'[Stepper_Driver] Initialized with pins: {self.m_pins}')
-
     def __del__(self):
         for pin in self.m_pins:
             GPIO.output(pin, GPIO.LOW)
         GPIO.cleanup(self.m_pins)
 
-        print(f'[Stepper_Driver] Cleaned up pins: {self.m_pins}')
-
     def get_steps(self):
         return self.m_steps
     
-    def set_reverse(self, p_reverse):
-        self.m_reverse = p_reverse
-    
     def step(self, p_steps):
-        for _ in range(p_steps):
+        if p_steps < 0:
+            self.m_reverse = True
+        elif p_steps > 0:
+            self.m_reverse = False
+        else:
+            raise Exception(f'[Stepper_Driver] Invalid step value: {p_steps}')
+
+        for _ in range(abs(p_steps)):
+            if self.m_steps >= self.m_c_STEPPER_MAX_STEPS:
+                print(f'[Stepper_Driver] Max steps reached: {self.m_c_STEPPER_MAX_STEPS}')
+                break
+
             for pin in range(4):
                 GPIO.output(self.m_pins[pin], self.m_c_STEPPER_STEP_SEQUENCE[self.m_sequence][pin])
-            print(f'[Stepper_Driver] Step: {self.m_sequence}')
             if self.m_reverse:
                 self.m_sequence = (self.m_sequence - 1) % 8
             elif not self.m_reverse:
@@ -73,11 +76,11 @@ class Stepper_Gesture():
         self.m_z_steps = 0
 
         # constants
-        self.m_c_STEPPER_STEPS_PER_ROTATION = 4096
-        self.m_c_STEPPER_X__CNTR_TO_FRONT = -4.0
-        self.m_c_STEPPER_Z_CNTR_TO_LEFT = 4.0
-        self.m_c_STEPPER_Z_CNTR_TO_RIGHT = -4.0
-        self.m_c_STEPPER_X_CNTR_TO_BACK = 4.0
+        self.m_c_STEPPER_MAX_STEPS = 1024
+        self.m_c_STEPPER_X__CNTR_TO_FRONT = -1.0
+        self.m_c_STEPPER_Z_CNTR_TO_LEFT = 1.0
+        self.m_c_STEPPER_Z_CNTR_TO_RIGHT = -1.0
+        self.m_c_STEPPER_X_CNTR_TO_BACK = 1.0
 
         self.m_thread_stepper_gesture = threading.Thread(target=self.update)
         self.m_thread_stepper_gesture.daemon = True
@@ -101,13 +104,13 @@ class Stepper_Gesture():
             target_z_steps = 0
 
             if self.m_head_position == Head_Position.MOVE_LEFT:
-                target_z_steps = self.m_c_STEPPER_Z_CNTR_TO_LEFT * self.m_c_STEPPER_STEPS_PER_ROTATION
+                target_z_steps = self.m_c_STEPPER_Z_CNTR_TO_LEFT * self.m_c_STEPPER_MAX_STEPS
             elif self.m_head_position == Head_Position.MOVE_RIGHT:
-                target_z_steps = self.m_c_STEPPER_Z_CNTR_TO_RIGHT * self.m_c_STEPPER_STEPS_PER_ROTATION
+                target_z_steps = self.m_c_STEPPER_Z_CNTR_TO_RIGHT * self.m_c_STEPPER_MAX_STEPS
             elif self.m_head_position == Head_Position.MOVE_FRONT:
-                target_x_steps = self.m_c_STEPPER_X__CNTR_TO_FRONT * self.m_c_STEPPER_STEPS_PER_ROTATION
+                target_x_steps = self.m_c_STEPPER_X__CNTR_TO_FRONT * self.m_c_STEPPER_MAX_STEPS
             elif self.m_head_position == Head_Position.MOVE_BACK:
-                target_x_steps = self.m_c_STEPPER_X_CNTR_TO_BACK * self.m_c_STEPPER_STEPS_PER_ROTATION
+                target_x_steps = self.m_c_STEPPER_X_CNTR_TO_BACK * self.m_c_STEPPER_MAX_STEPS
             elif self.m_head_position == Head_Position.MOVE_STOP:
                 pass
 

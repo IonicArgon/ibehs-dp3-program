@@ -71,7 +71,7 @@ def main():
 
 def main():
     test_stepper = Stepper_Driver([0, 5, 6, 13], 0.002, False)
-    test_stepper.step(2048)
+    test_stepper.step(2024)
     time.sleep(2)
     test_stepper.set_reverse(True)
     test_stepper.step(1024)
