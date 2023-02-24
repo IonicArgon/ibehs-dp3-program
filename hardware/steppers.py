@@ -2,6 +2,7 @@
 from lib.gestures import Head_Position
 import threading
 import time
+import sys
 import RPi.GPIO as GPIO # type: ignore[import]
 
 class Stepper_Driver():
@@ -111,8 +112,10 @@ class Stepper_Gesture():
             
 # for testing purposes
 if __name__ == '__main__':
+    sys.path.append('..')
+
     test_stepper = Stepper_Driver([0, 5, 6, 13], 0.002, False)
-    test_stepper.step(4096)
+    test_stepper.step(4096 / 2)
     time.sleep(5)
-    test_stepper.step(-4096)
+    test_stepper.step(-(4096 / 2))
     time.sleep(5)
