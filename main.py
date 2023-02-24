@@ -8,6 +8,7 @@ import threading
 import time
 
 # global objects b/c of threading
+'''
 orientation = Orientation(p_alpha=0.9, p_window_size=10, p_round=2)
 gestures = Gestures(p_config_file="config.json", p_gesture_window_time=1.0)
 
@@ -16,6 +17,7 @@ stepper2 = Stepper_Driver(p_pins=[None, None, None, None], p_step_time=0.002, p_
 stepper_ctrl = Stepper_Gesture(p_stepper_drive1=stepper1, p_stepper_drive2=stepper2, p_update_speed=0.1)
 
 vibration = Vibration(p_buzzer_pin=None, p_loop_delay=0.1)
+
 
 def console_output_fn():
     header = f'{"Timestamp":^15}|{"Orientation":^15}|{"Gestures":^15}|{"Steppers":^15}|{"Vibration":^15}'
@@ -64,6 +66,14 @@ def main():
         stepper_ctrl.set_gesture(p_gesture=gestures.get())
         vibration.set_gesture(p_gesture=gestures.get())
         time.sleep(0.1)
+'''
+
+def main():
+    test_stepper = Stepper_Driver([0, 5, 6, 13], 0.002, False)
+    test_stepper.step(4096 / 2)
+    time.sleep(5)
+    test_stepper.step(-(4096 / 2))
+    time.sleep(5)
 
 if __name__ == "__main__":
     main()
