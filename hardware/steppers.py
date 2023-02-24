@@ -108,3 +108,11 @@ class Stepper_Gesture():
             self.m_stepper_drive2.step(z_steps)
 
             time.sleep(self.m_update_speed)
+            
+# for testing purposes
+if __name__ == '__main__':
+    test_stepper = Stepper_Driver([0, 5, 6, 13], 0.002, False)
+    test_stepper.step(4096)
+    time.sleep(5)
+    test_stepper.step(-4096)
+    time.sleep(5)
