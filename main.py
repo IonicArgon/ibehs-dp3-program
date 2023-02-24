@@ -70,10 +70,10 @@ def main():
 '''
 
 def main():
-    test_stepper = Stepper_Driver([0, 5, 6, 13], 0.002, True)
+    test_stepper = Stepper_Driver([0, 5, 6, 13], 0.002, False)
     test_stepper.step(1024)
     time.sleep(2)
-    test_stepper.set_reverse(False)
+    test_stepper.set_reverse(True)
     test_stepper.step(1024)
 
 if __name__ == "__main__":
