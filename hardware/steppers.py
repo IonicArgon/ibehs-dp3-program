@@ -1,7 +1,7 @@
 # space for imports
 import threading
 import time
-import sys
+import math
 import RPi.GPIO as GPIO # type: ignore[import]
 from lib.gestures import Head_Position
 
@@ -51,7 +51,7 @@ class Stepper_Driver():
             raise Exception(f'[Stepper_Driver] Invalid step value: {p_steps}')
 
         for _ in range(abs(p_steps)):
-            if self.m_steps >= self.m_c_STEPPER_MAX_STEPS:
+            if self.m_steps > self.m_c_STEPPER_MAX_STEPS:
                 print(f'[Stepper_Driver] Max steps reached: {self.m_c_STEPPER_MAX_STEPS}')
                 break
 
@@ -64,7 +64,7 @@ class Stepper_Driver():
             else:
                 raise Exception(f'[Stepper_Driver] Invalid reverse value: {self.m_reverse}]')
             
-            self.m_steps += 1
+            self.m_steps += math.copysign(1, p_steps)
             time.sleep(self.m_step_time)
 
         self.m_reverse = default_reverse
