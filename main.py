@@ -1,6 +1,6 @@
 from hardware.orientation import Orientation
 from hardware.steppers import Stepper_Driver, Stepper_Gesture
-from hardware.vibration import Vibration, Buzzer_Wrapper
+from hardware.vibration import Vibration
 from lib.gestures import Gestures
 import RPi.GPIO as GPIO # type: ignore[import]
 
@@ -9,15 +9,14 @@ import threading
 import time
 
 # global objects b/c of threading
-'''
 orientation = Orientation(p_alpha=0.9, p_window_size=10, p_round=2)
 gestures = Gestures(p_config_file="config.json", p_gesture_window_time=1.0)
 
-stepper1 = Stepper_Driver(p_pins=[None, None, None, None], p_step_time=0.002, p_reversed=False)
-stepper2 = Stepper_Driver(p_pins=[None, None, None, None], p_step_time=0.002, p_reversed=False)
-stepper_ctrl = Stepper_Gesture(p_stepper_drive1=stepper1, p_stepper_drive2=stepper2, p_update_speed=0.1)
+stepper_x = Stepper_Driver(p_pins=[25, 8, 7, 1], p_step_time=0.001, p_reversed=False)
+stepper_z = Stepper_Driver(p_pins=[0, 5, 6, 13], p_step_time=0.001, p_reversed=False)
+stepper_ctrl = Stepper_Gesture(p_stepper_drive1=stepper_x, p_stepper_drive2=stepper_z, p_update_speed=0.1)
 
-vibration = Vibration(p_buzzer_pin=None, p_loop_delay=0.1)
+vibration = Vibration(p_buzzer_pin=14, p_loop_delay=0.1)
 
 
 def console_output_fn():
@@ -42,7 +41,7 @@ def console_output_fn():
             print()
 
         time_now = time.strftime("%H:%M:%S", time.localtime())
-        xyz_now = orientation.get_xyz()
+        xyz_now = orientation.get()
         gestures_now = gestures.get_status()
         stepper_now = stepper_ctrl.get_status()
         vibration_now = vibration.get_status()
@@ -63,18 +62,11 @@ def main():
     global vibration
 
     while True:
-        gestures.set_xyz(p_xyz=orientation.get_xyz())
-        stepper_ctrl.set_gesture(p_gesture=gestures.get())
-        vibration.set_gesture(p_gesture=gestures.get())
+        gestures.set_xyz(p_xyz=orientation.get())
+        stepper_ctrl.set_head_position(p_head_position=gestures.get())
+        vibration.set_head_position(p_head_position=gestures.get())
         time.sleep(0.1)
-'''
 
-def main():
-    stepper_x = Stepper_Driver(p_pins=[25, 8, 7, 1], p_step_time=0.001, p_reversed=True)
-    stepper_z = Stepper_Driver(p_pins=[0, 5, 6, 13], p_step_time=0.001, p_reversed=True)
-    buzzer_test = Buzzer_Wrapper(14)
-    
-    buzzer_test.play_pattern("... --- ...")
 
 if __name__ == "__main__":
     main()
