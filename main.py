@@ -21,7 +21,7 @@ gestures = Gestures(p_config_file="config.json", p_gesture_window_time=1.0)
 
 def console_output_fn():
     COLUMN_WIDTH = 18
-    COLUMN_THIRD = int(COLUMN_WIDTH / 3)
+    COLUMN_THIRD = 6
 
     header = f'{"Timestamp":^{COLUMN_WIDTH}}|{"Orientation":^{COLUMN_WIDTH}}|\
         {"Gestures":^{COLUMN_WIDTH}}|{"Steppers":^{COLUMN_WIDTH}}|\
