@@ -20,8 +20,15 @@ gestures = Gestures(p_config_file="config.json", p_gesture_window_time=1.0)
 
 
 def console_output_fn():
-    header = f'{"Timestamp":^15}|{"Orientation":^15}|{"Gestures":^15}|{"Steppers":^15}|{"Vibration":^15}'
-    subheader = f'{" ":^15}|{"X":^5}{"Y":^5}{"Z":^5}|{" ":^15}|{"X":^5}{"Z":^5}{" ":^5}|{" ":^15}'
+    COLUMN_WIDTH = 18
+
+    header = f'{"Timestamp":^{COLUMN_WIDTH}}|{"Orientation":^{COLUMN_WIDTH}}|\
+        {"Gestures":^{COLUMN_WIDTH}}|{"Steppers":^{COLUMN_WIDTH}}|\
+        {"Vibration":^{COLUMN_WIDTH}}'
+    subheader = f'{" ":^{COLUMN_WIDTH}}|{"X":^{COLUMN_WIDTH/3}}\
+        {"Y":^{COLUMN_WIDTH/3}}{"Z":^{COLUMN_WIDTH/3}}|{" ":^{COLUMN_WIDTH}}|\
+        {"X":^{COLUMN_WIDTH/3}}{"Z":^{COLUMN_WIDTH/3}}{" ":^{COLUMN_WIDTH/3}}|\
+        {" ":^{COLUMN_WIDTH}}'
     header_counter = 0
 
     global orientation
@@ -43,12 +50,16 @@ def console_output_fn():
         time_now = time.strftime("%H:%M:%S", time.localtime())
         xyz_now = orientation.get()
         xyz_now = [0, 0, 0] if xyz_now == [None, None, None] else \
-            [round(xyz_now[0], 2), round(xyz_now[1], 2), round(xyz_now[2], 2)]
+            [round(xyz_now[0], 1), round(xyz_now[1], 1), round(xyz_now[2], 1)]
         gestures_now = gestures.get_status()
         # stepper_now = stepper_ctrl.get_status()
         # vibration_now = vibration.get_status()
 
-        outputString = f'{time_now:^15}|{xyz_now[0]:^5}{xyz_now[1]:^5}{xyz_now[2]:^5}|{gestures_now:^15}|'
+        outputString = f'{time_now:^{COLUMN_WIDTH}}|\
+            {xyz_now[0]:^{COLUMN_WIDTH/3}}\
+            {xyz_now[1]:^{COLUMN_WIDTH/3}}\
+            {xyz_now[2]:^{COLUMN_WIDTH/3}}|\
+            {gestures_now:^{COLUMN_WIDTH}}|'
                         #  {stepper_now[0]:^5}{stepper_now[1]:^5}{" ":^5}|{vibration_now:^15}'
         print(outputString)
         header_counter += 1

@@ -103,8 +103,6 @@ class Gestures():
                         # increment once on new falling edge
                         if self.m_count == 0:
                             self.m_count += 1
-                            print(f'[GEST] Count: {self.m_count}')
-
                         break
 
                 self.m_internal_orientation = {
