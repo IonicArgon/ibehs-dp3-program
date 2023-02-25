@@ -42,7 +42,8 @@ def console_output_fn():
 
         time_now = time.strftime("%H:%M:%S", time.localtime())
         xyz_now = orientation.get()
-        xyz_now = [0, 0, 0] if xyz_now == [None, None, None] else xyz_now
+        xyz_now = [0, 0, 0] if xyz_now == [None, None, None] else \
+            [round(xyz_now[0], 2), round(xyz_now[1], 2), round(xyz_now[2], 2)]
         gestures_now = gestures.get_status()
         # stepper_now = stepper_ctrl.get_status()
         # vibration_now = vibration.get_status()
