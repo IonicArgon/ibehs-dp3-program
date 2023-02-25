@@ -44,9 +44,9 @@ class Stepper_Driver():
         default_reverse = self.m_reverse
 
         if p_steps < 0:
-            self.m_reverse = True
+            self.m_reverse = not self.m_reverse
         elif p_steps > 0:
-            self.m_reverse = False
+            pass
         else:
             raise Exception(f'[Stepper_Driver] Invalid step value: {p_steps}')
             
