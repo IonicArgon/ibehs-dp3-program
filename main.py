@@ -21,13 +21,14 @@ gestures = Gestures(p_config_file="config.json", p_gesture_window_time=1.0)
 
 def console_output_fn():
     COLUMN_WIDTH = 18
+    COLUMN_THIRD = int(COLUMN_WIDTH / 3)
 
     header = f'{"Timestamp":^{COLUMN_WIDTH}}|{"Orientation":^{COLUMN_WIDTH}}|\
         {"Gestures":^{COLUMN_WIDTH}}|{"Steppers":^{COLUMN_WIDTH}}|\
         {"Vibration":^{COLUMN_WIDTH}}'
-    subheader = f'{" ":^{COLUMN_WIDTH}}|{"X":^{COLUMN_WIDTH/3}}\
-        {"Y":^{COLUMN_WIDTH/3}}{"Z":^{COLUMN_WIDTH/3}}|{" ":^{COLUMN_WIDTH}}|\
-        {"X":^{COLUMN_WIDTH/3}}{"Z":^{COLUMN_WIDTH/3}}{" ":^{COLUMN_WIDTH/3}}|\
+    subheader = f'{" ":^{COLUMN_WIDTH}}|{"X":^{COLUMN_THIRD}}\
+        {"Y":^{COLUMN_THIRD}}{"Z":^{COLUMN_THIRD}}|{" ":^{COLUMN_WIDTH}}|\
+        {"X":^{COLUMN_THIRD}}{"Z":^{COLUMN_THIRD}}{" ":^{COLUMN_THIRD}}|\
         {" ":^{COLUMN_WIDTH}}'
     header_counter = 0
 
@@ -56,9 +57,9 @@ def console_output_fn():
         # vibration_now = vibration.get_status()
 
         outputString = f'{time_now:^{COLUMN_WIDTH}}|\
-            {xyz_now[0]:^{COLUMN_WIDTH/3}}\
-            {xyz_now[1]:^{COLUMN_WIDTH/3}}\
-            {xyz_now[2]:^{COLUMN_WIDTH/3}}|\
+            {xyz_now[0]:^{COLUMN_THIRD}}\
+            {xyz_now[1]:^{COLUMN_THIRD}}\
+            {xyz_now[2]:^{COLUMN_THIRD}}|\
             {gestures_now:^{COLUMN_WIDTH}}|'
                         #  {stepper_now[0]:^5}{stepper_now[1]:^5}{" ":^5}|{vibration_now:^15}'
         print(outputString)
