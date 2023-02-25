@@ -64,8 +64,8 @@ def console_output_fn():
                        f'{xyz_now[1]:^{COLUMN_THIRD}}|' + \
                        f'{xyz_now[2]:^{COLUMN_NUM}}|' + \
                        f'{gestures_now:^{COLUMN_WIDTH}}|' + \
-                       f'{stepper_now[0]:^{COLUMN_THIRD}}|' + \
-                       f'{stepper_now[1]:^{COLUMN_THIRD}}|' + \
+                       f'{int(stepper_now[0]):^{COLUMN_THIRD}}|' + \
+                       f'{int(stepper_now[1]):^{COLUMN_THIRD}}|' + \
                        f'{"":^{COLUMN_THIRD}}|' + \
                        f'{vibration_now:^{COLUMN_WIDTH}}|'
         print(outputString)
