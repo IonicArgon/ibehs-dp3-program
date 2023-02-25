@@ -45,7 +45,7 @@ class Stepper_Driver():
 
         if p_steps < 0:
             self.m_reverse = not self.m_reverse
-        elif p_steps > 0:
+        elif p_steps > 0 or p_steps == 0:
             pass
         else:
             raise Exception(f'[Stepper_Driver] Invalid step value: {p_steps}')
@@ -83,7 +83,7 @@ class Stepper_Gesture():
 
         # constants
         self.m_c_STEPPER_MAX_STEPS = 1024
-        self.m_c_STEPPER_X__CNTR_TO_FRONT = -1.0
+        self.m_c_STEPPER_X_CNTR_TO_FRONT = -1.0
         self.m_c_STEPPER_Z_CNTR_TO_LEFT = 1.0
         self.m_c_STEPPER_Z_CNTR_TO_RIGHT = -1.0
         self.m_c_STEPPER_X_CNTR_TO_BACK = 1.0
@@ -99,7 +99,7 @@ class Stepper_Gesture():
         self.m_head_position = p_head_position
 
     def get_status(self):
-        return (self.m_x_steps, self.m_z_steps)
+        return [self.m_x_steps, self.m_z_steps]
 
     def update(self):
         while True:
@@ -113,9 +113,9 @@ class Stepper_Gesture():
                 target_z_steps = self.m_c_STEPPER_Z_CNTR_TO_LEFT * self.m_c_STEPPER_MAX_STEPS
             elif self.m_head_position == Head_Position.MOVE_RIGHT:
                 target_z_steps = self.m_c_STEPPER_Z_CNTR_TO_RIGHT * self.m_c_STEPPER_MAX_STEPS
-            elif self.m_head_position == Head_Position.MOVE_FRONT:
-                target_x_steps = self.m_c_STEPPER_X__CNTR_TO_FRONT * self.m_c_STEPPER_MAX_STEPS
-            elif self.m_head_position == Head_Position.MOVE_BACK:
+            elif self.m_head_position == Head_Position.MOVE_FORWARD:
+                target_x_steps = self.m_c_STEPPER_X_CNTR_TO_FRONT * self.m_c_STEPPER_MAX_STEPS
+            elif self.m_head_position == Head_Position.MOVE_BACKWARD:
                 target_x_steps = self.m_c_STEPPER_X_CNTR_TO_BACK * self.m_c_STEPPER_MAX_STEPS
             elif self.m_head_position == Head_Position.MOVE_STOP:
                 pass
@@ -123,7 +123,7 @@ class Stepper_Gesture():
             x_steps = target_x_steps - self.m_x_steps
             z_steps = target_z_steps - self.m_z_steps
 
-            self.m_stepper_drive1.step(x_steps)
-            self.m_stepper_drive2.step(z_steps)
+            self.m_stepper_drive1.step(int(x_steps))
+            self.m_stepper_drive2.step(int(z_steps))
 
             time.sleep(self.m_update_speed)
