@@ -12,24 +12,23 @@ class Buzzer_Wrapper():
         self.m_c_BUZZER_PATTERNS = {
             ".": 0.1,
             "-": 0.3,
+            " ": 0.1
         }
         self.m_c_BUZZER_DELAY = 0.1
+        self.m_buzzer.off()
 
     def __del__(self):
         self.m_buzzer.off()
 
     def play_pattern(self, p_pattern):
         for char in p_pattern:
-            if char == ".":
+            if char in ".-":
                 self.m_buzzer.on()
                 time.sleep(self.m_c_BUZZER_PATTERNS[char])
                 self.m_buzzer.off()
                 time.sleep(self.m_c_BUZZER_DELAY)
-            elif char == "-":
-                self.m_buzzer.on()
+            elif char == " ":
                 time.sleep(self.m_c_BUZZER_PATTERNS[char])
-                self.m_buzzer.off()
-                time.sleep(self.m_c_BUZZER_DELAY)
             else:
                 raise Exception(f'[Buzzer_Wrapper] Invalid pattern: {p_pattern}]')
 
