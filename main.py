@@ -70,11 +70,13 @@ def main():
 '''
 
 def main():
-    test_stepper = Stepper_Driver([0, 5, 6, 13], 0.002, True)
-    test_stepper.step(1024)
-    test_stepper.step(-1024)
-    test_stepper.step(-1024)
-    test_stepper.step(1024)
+    stepper_x = Stepper_Driver(p_pins=[25, 8, 7, 1], p_step_time=0.002, p_reversed=True)
+    stepper_z = Stepper_Driver(p_pins=[0, 5, 6, 13], p_step_time=0.002, p_reversed=False)
+
+    stepper_x.step(-1024)
+    stepper_z.step(-1024)
+    stepper_x.step(1024)
+    stepper_z.step(1024)
 
 if __name__ == "__main__":
     main()
