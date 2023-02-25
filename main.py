@@ -61,7 +61,7 @@ def console_output_fn():
                        f'{xyz_now[0]:^{COLUMN_THIRD}}|' + \
                        f'{xyz_now[1]:^{COLUMN_THIRD}}|' + \
                        f'{xyz_now[2]:^{COLUMN_THIRD}}||' + \
-                       f'{gestures_now:^{COLUMN_WIDTH}}||' + \
+                       f'{gestures_now:^{COLUMN_WIDTH}}||'
         print(outputString)
         header_counter += 1
         time.sleep(1)
