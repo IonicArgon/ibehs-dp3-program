@@ -5,6 +5,7 @@
 # package imports
 import threading
 import time
+from collections import Counter
 
 # local imports
 from hardware.orientation import Orientation
@@ -33,14 +34,15 @@ def console_output_fn():
     COLUMN_DOUBLE = int((COLUMN_WIDTH) * 2)
     COLUMN_THIRD = int((COLUMN_WIDTH) / 3)
     COLUMN_NUM = COLUMN_THIRD - 1
+    PRINT_DELAY = 1.0
 
     # header layout
-    header = f'{"Timestamp":^{COLUMN_WIDTH}}|{"Orientation":^{COLUMN_DOUBLE}}|' + \
+    header = f'{"Timestamp":^{COLUMN_WIDTH}}|{"Orientation":^{COLUMN_DOUBLE}} |' + \
              f'{"Gestures":^{COLUMN_WIDTH}}|{"Steppers":^{COLUMN_WIDTH}}|' + \
              f'{"Vibration":^{COLUMN_WIDTH}}|'
     subheader = f'{" ":^{COLUMN_WIDTH}}|' + \
                 f'{"X raw":^{COLUMN_THIRD}}{"Y raw":^{COLUMN_THIRD}}{"Z raw":^{COLUMN_THIRD}}|' + \
-                f'{"X EMA":^{COLUMN_THIRD}}{"Y EMA":^{COLUMN_THIRD}}{"Z EMA":^{COLUMN_THIRD}}' + \
+                f'{"X EMA":^{COLUMN_THIRD}}{"Y EMA":^{COLUMN_THIRD}}{"Z EMA":^{COLUMN_THIRD}}|' + \
                 f'{" ":^{COLUMN_WIDTH}}|' + \
                 f'{"X":^{COLUMN_THIRD}}{"Z":^{COLUMN_THIRD}}{" ":^{COLUMN_THIRD}}|' + \
                 f'{" ":^{COLUMN_WIDTH}}|'
@@ -67,14 +69,15 @@ def console_output_fn():
         # get data
         time_now = time.strftime("%H:%M:%S", time.localtime())
 
-        xyz_now = orientation.get_ema()
+        xyz_ema = orientation.get_ema()
         xyz_raw = orientation.get_raw()
 
         # quick helper lambda because we don't need a whole function for this
-        xyz_list_parse = lambda xyz: [0, 0, 0] if xyz == [None, None, None] else \
+        xyz_list_parse = lambda xyz: [0.0, 0.0, 0.0] if Counter([type(val) for val in xyz]).total() == 3 else\
             [round(xyz[0], 1), round(xyz[1], 1), round(xyz[2], 1)]
+            
 
-        xyz_now = xyz_list_parse(xyz_now)
+        xyz_ema = xyz_list_parse(xyz_ema)
         xyz_raw = xyz_list_parse(xyz_raw)
 
         gestures_now = gestures.get_status()
@@ -84,25 +87,28 @@ def console_output_fn():
 
         # format data to output string and print
         outputString = f'{time_now:^{COLUMN_WIDTH}}|' + \
-                       f'{xyz_now[0]:^{COLUMN_NUM}}|' + \
-                       f'{xyz_now[1]:^{COLUMN_THIRD}}|' + \
-                       f'{xyz_now[2]:^{COLUMN_NUM}}|' + \
                        f'{xyz_raw[0]:^{COLUMN_NUM}}|' + \
                        f'{xyz_raw[1]:^{COLUMN_THIRD}}|' + \
                        f'{xyz_raw[2]:^{COLUMN_NUM}}|' + \
+                       f'{xyz_ema[0]:^{COLUMN_NUM}}|' + \
+                       f'{xyz_ema[1]:^{COLUMN_THIRD}}|' + \
+                       f'{xyz_ema[2]:^{COLUMN_NUM}}|' + \
                        f'{gestures_now:^{COLUMN_WIDTH}}|' + \
-                       f'{int(stepper_now[0]):^{COLUMN_THIRD}}|' + \
+                       f'{int(stepper_now[0]):^{COLUMN_NUM}}|' + \
                        f'{int(stepper_now[1]):^{COLUMN_THIRD}}|' + \
-                       f'{"":^{COLUMN_THIRD}}|' + \
+                       f'{"":^{COLUMN_NUM}}|' + \
                        f'{vibration_now:^{COLUMN_WIDTH}}|'
         print(outputString)
         header_counter += 1
-        time.sleep(1)
+        time.sleep(PRINT_DELAY)
 
 # ----------------------------------------------------------------------------- #
 
 # main function
 def main():
+    # constants
+    MAIN_DELAY = 0.1
+    
     # start console output thread
     console_output_thread = threading.Thread(target=console_output_fn)
     console_output_thread.daemon = True
@@ -115,10 +121,12 @@ def main():
 
     # get gesturefrom orientation sensor data, send to stepper and vibration
     while True:
-        gestures.set_xyz(p_xyz=orientation.get())
+        gestures.set_xyz(p_xyz=orientation.get_ema())
         stepper_ctrl.set_head_position(p_head_position=gestures.get())
         vibration.set_head_position(p_head_position=gestures.get())
-        time.sleep(0.1)
+        time.sleep(MAIN_DELAY)
 
 if __name__ == "__main__":
+    print("We recommend setting your terminal to full screen to see the data better.")
+    time.sleep(2)
     main()
