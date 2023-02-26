@@ -39,7 +39,13 @@ class Orientation():
 
     def update(self):
         while True:
-            self.m_raw = self.m_sensor.euler_angles()
+            # sometimes the i2c bus gets stuck so we need to try again
+            try:
+                self.m_raw = self.m_sensor.euler_angles()
+            except OSError as e:
+                print(f'[Orientation] OSError {e}, trying again...')
+                time.sleep(0.1)
+                continue
 
             # stepping through each axes' EMA and updating it
             for i in range(3):
