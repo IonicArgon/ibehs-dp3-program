@@ -1,6 +1,11 @@
-## reusable expomential moving average class
+# by:           Marco Tan, Emily Attai
+# last updated: 2023-02-25
+# description:  reusable code for exponential moving average
+
+# ----------------------------------------------------------------------------- #
+
 class EMA:
-    def __init__(self, p_alpha, p_window_size, p_round) -> None:
+    def __init__(self, p_alpha, p_window_size, p_round):
         self.m_alpha = p_alpha
         self.m_out = 0.0
         self.m_last_out = 0.0
@@ -18,7 +23,10 @@ class EMA:
         return self.m_out
 
     def update(self, p_in):
+        # make sure our number is always a float
         self.m_window.append(float(p_in or 0.0))
+
+        # if we have not reached the window size yet, return None
         if len(self.m_window) < self.m_window_size:
             self.m_out = None
             return

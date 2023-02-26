@@ -1,11 +1,19 @@
-# space for imports
+# by:           Marco Tan, Emily Attai
+# last updated: 2023-02-25
+# description:  code for stepper motors and stepper activation
+
+# package imports
 import threading
 import time
 import math
 import RPi.GPIO as GPIO # type: ignore[import]
+
+# local imports
 from lib.gestures import Head_Position
 
+# ----------------------------------------------------------------------------- #
 
+# class to control stepper motors using ULN2003 stepper motor driver
 class Stepper_Driver():
     def __init__(self, p_pins: list, p_step_time, p_reversed = False):
         self.m_pins = p_pins
@@ -19,7 +27,7 @@ class Stepper_Driver():
             GPIO.setup(pin, GPIO.OUT)
             GPIO.output(pin, GPIO.LOW)
 
-        # constants
+        # constants for controlling stepper motor driver
         self.m_c_STEPPER_MAX_STEPS = 1024
         self.m_c_STEPPER_STEP_SEQUENCE = [
             [1, 0, 0, 1],
@@ -43,6 +51,7 @@ class Stepper_Driver():
     def step(self, p_steps):
         default_reverse = self.m_reverse
 
+        # check to see if the next command will reverse the motor
         if p_steps < 0:
             self.m_reverse = not self.m_reverse
         elif p_steps > 0 or p_steps == 0:
@@ -56,6 +65,7 @@ class Stepper_Driver():
             self.m_reverse = default_reverse
             return
 
+        # step the motor the specified number of steps in the specified direction
         for _ in range(abs(p_steps)):
             for pin in range(4):
                 GPIO.output(self.m_pins[pin], self.m_c_STEPPER_STEP_SEQUENCE[self.m_sequence][pin])
@@ -71,6 +81,9 @@ class Stepper_Driver():
 
         self.m_reverse = default_reverse
 
+# ----------------------------------------------------------------------------- #
+
+# class to signal stepper drivers based on gesture commands
 class Stepper_Gesture():
     def __init__(self, p_stepper_drive1, p_stepper_drive2, p_update_speed):
         self.m_current_head_position = Head_Position.MOVE_STOP
@@ -88,6 +101,7 @@ class Stepper_Gesture():
         self.m_c_STEPPER_Z_CNTR_TO_RIGHT = -1.0
         self.m_c_STEPPER_X_CNTR_TO_BACK = 1.0
 
+        # start thread to update stepper motor positions
         self.m_thread_stepper_gesture = threading.Thread(target=self.update)
         self.m_thread_stepper_gesture.daemon = True
         self.m_thread_stepper_gesture.start()
@@ -98,9 +112,11 @@ class Stepper_Gesture():
     def set_head_position(self, p_head_position):
         self.m_head_position = p_head_position
 
+    # we're returning the amount of steps taken for x and z
     def get_status(self):
         return [self.m_x_steps, self.m_z_steps]
 
+    # thread to update stepper motor positions
     def update(self):
         while True:
             self.m_x_steps = self.m_stepper_drive1.get_steps()

@@ -1,10 +1,17 @@
-# space for imports
+# by:           Marco Tan, Emily Attai
+# last updated: 2023-02-25
+# description:  code to detect gestures from orientation xyz data
+
+# package imports
 from enum import IntEnum
 import threading
 import time
 import json
 import math
 
+# ----------------------------------------------------------------------------- #
+
+# enum class for gestures make code more readable (vs. using numbers)
 class Head_Position(IntEnum):
     MOVE_FORWARD    = 0
     MOVE_BACKWARD   = 1
@@ -12,12 +19,16 @@ class Head_Position(IntEnum):
     MOVE_LEFT       = 3 
     MOVE_STOP       = 4
 
+# ----------------------------------------------------------------------------- #
+
+# class to detect gestures from orientation xyz data
 class Gestures():
     def __init__(self, p_config_file, p_gesture_window_time):
         # configerations
         self.m_gestures = {}
         self.m_gesture_window_len = p_gesture_window_time
 
+        # load gestures from json config file
         with open(p_config_file, "r") as f:
             gestures = (json.load(f))["gestures"]
             for i in gestures:
@@ -33,12 +44,13 @@ class Gestures():
         self.m_prev_vector = 0
         self.m_count = 0
 
-        # for threading
+        # for threading of internal values (because we want concurrent updating)
         self.m_update_internal_thread = threading.Thread(target=self.update_internal_values)
         self.m_update_internal_thread.daemon = True
         self.m_update_internal_thread_running = False
         self.m_update_internal_thread.start()
 
+        # for threading of gesture output
         self.m_update_gesture_thread = threading.Thread(target=self.update_gesture_output)
         self.m_update_gesture_thread.daemon = True
         self.m_update_gesture_thread_running = True
@@ -51,6 +63,7 @@ class Gestures():
     def get(self):
         return self.m_head_position
     
+    # must convert to strings for output to console
     def get_status(self):
         if self.m_head_position == Head_Position.MOVE_FORWARD:
             return "FORWARD"
@@ -69,11 +82,12 @@ class Gestures():
     def update_internal_values(self):
         while True:
             if self.m_update_internal_thread_running == False:
+                # reset internal values when not updating
                 self.m_largest_direction_xyz = [0, 0, 0]
                 self.m_prev_vector = 0
                 self.m_count = 0
-
             else:
+                # find largest direction between Y and Z (X is not used)
                 for i in range(1, 3):
                     vector = self.m_internal_xyz[i]
                     vector = vector if vector is not None else 0
@@ -83,13 +97,15 @@ class Gestures():
                         self.m_largest_direction_xyz[i] = math.copysign(1, vector)
                         self.m_prev_vector = vector
 
+                # check if gesture is detected
                 for i in self.m_gestures:
                     gesture = self.m_gestures[i]
 
                     direction_test = (gesture["direction"] == self.m_largest_direction_xyz)
 
                     # get index of 1 or -1 in gesture
-                    vector_index = gesture["direction"].index(1) if 1 in gesture["direction"] else gesture["direction"].index(-1)
+                    vector_index = gesture["direction"].index(1) if 1 in gesture["direction"] \
+                                   else gesture["direction"].index(-1)
                     vector = self.m_internal_xyz[vector_index]
                     vector = vector if vector is not None else 0
 
@@ -105,6 +121,7 @@ class Gestures():
                             self.m_count += 1
                         break
 
+                # output internal values using a dictionary for easier reading
                 self.m_internal_orientation = {
                     "direction": self.m_largest_direction_xyz,
                     "count": self.m_count
@@ -114,12 +131,12 @@ class Gestures():
 
     def update_gesture_output(self):
         while self.m_update_gesture_thread_running:
-            # update internal values
+            # update internal values every gesture window length
             self.m_update_internal_thread_running = True
             time.sleep(self.m_gesture_window_len)
             self.m_update_internal_thread_running = False
 
-            # set the default position
+            # set the default position in case no gesture is detected
             self.m_head_position = Head_Position.MOVE_STOP
 
             for i in self.m_gestures:
