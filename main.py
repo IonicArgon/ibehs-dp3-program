@@ -5,7 +5,6 @@
 # package imports
 import threading
 import time
-from collections import Counter
 
 # local imports
 from hardware.orientation import Orientation
@@ -26,6 +25,19 @@ stepper_ctrl = Stepper_Gesture(p_stepper_drive1=stepper_x, p_stepper_drive2=step
 vibration = Vibration(p_buzzer_pin=14, p_loop_delay=5.0)
 
 # ----------------------------------------------------------------------------- #
+
+# fn to help with parsing xyz data (you will see)
+def xyz_list_parse(p_xyz):
+    return_val = [0.0, 0.0, 0.0]
+
+    # check if all numbers
+    if all(isinstance(n, (int, float)) for n in p_xyz):
+        return_val = p_xyz
+    
+    # round to 1 decimal place
+    return_val = [round(n, 1) for n in return_val]
+
+    return return_val
 
 # fn to print statuses to console
 def console_output_fn():
@@ -71,11 +83,6 @@ def console_output_fn():
 
         xyz_ema = orientation.get_ema()
         xyz_raw = orientation.get_raw()
-
-        # quick helper lambda because we don't need a whole function for this
-        xyz_list_parse = lambda xyz: [0.0, 0.0, 0.0] if Counter([type(val) for val in xyz]).total() == 3 else\
-            [round(xyz[0], 1), round(xyz[1], 1), round(xyz[2], 1)]
-            
 
         xyz_ema = xyz_list_parse(xyz_ema)
         xyz_raw = xyz_list_parse(xyz_raw)
