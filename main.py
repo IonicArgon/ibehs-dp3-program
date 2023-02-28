@@ -581,7 +581,7 @@ def main():
     global stepper_ctrl
     global vibration
 
-    # get gesturefrom orientation sensor data, send to stepper and vibration
+    # get gesture from orientation sensor data, send to stepper and vibration
     while True:
         gestures.set_xyz(p_xyz=orientation.get_ema())
         stepper_ctrl.set_head_position(p_head_position=gestures.get())
