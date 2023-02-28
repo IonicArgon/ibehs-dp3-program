@@ -1,16 +1,458 @@
-# by:           Marco Tan, Emily Attai
-# last updated: 2023-02-25
-# description:  main file for the project
-
 # package imports
 import threading
 import time
+import json
+import math
+import RPi.GPIO as GPIO # type: ignore[import]
+from sensor_library import Orientation_Sensor
+from enum import IntEnum
+from gpiozero import Buzzer
 
-# local imports
-from hardware.orientation import Orientation
-from hardware.steppers import Stepper_Driver, Stepper_Gesture
-from hardware.vibration import Vibration
-from lib.gestures import Gestures
+# ----------------------------------------------------------------------------- #
+# by:           Marco Tan, Emily Attai
+# last updated: 2023-02-25
+# description:  reusable code for exponential moving average
+class EMA:
+    def __init__(self, p_alpha, p_window_size, p_round):
+        self.m_alpha = p_alpha
+        self.m_out = 0.0
+        self.m_last_out = 0.0
+        self.m_window = []
+        self.m_window_size = p_window_size
+        self.m_round = p_round
+
+    def set_alpha(self, p_alpha):
+        self.m_alpha = p_alpha
+
+    def set_window_size(self, p_window_size):
+        self.m_window_size = p_window_size
+
+    def get(self):
+        return self.m_out
+
+    def update(self, p_in):
+        # make sure our number is always a float
+        self.m_window.append(float(p_in or 0.0))
+
+        # if we have not reached the window size yet, return None
+        if len(self.m_window) < self.m_window_size:
+            self.m_out = None
+            return
+        else:
+            self.m_window.pop(0)
+
+        window_avg = round(sum(self.m_window) / self.m_window_size, self.m_round)
+        self.m_out = self.m_alpha * window_avg + (1 - self.m_alpha) * self.m_last_out
+        self.m_last_out = self.m_out
+
+# ----------------------------------------------------------------------------- #
+# by:           Marco Tan, Emily Attai
+# last updated: 2023-02-25
+# description:  reading orientation sensor and outputting smoothed data
+
+# class to read orientation sensor and output smoothed data
+class Orientation():
+    def __init__(self, p_alpha, p_window_size, p_round):
+        self.m_sensor = Orientation_Sensor()
+        self.m_ema_xyz = [
+            EMA(p_alpha, p_window_size, p_round),
+            EMA(p_alpha, p_window_size, p_round),
+            EMA(p_alpha, p_window_size, p_round)
+        ]
+        self.m_raw = [None, None, None]
+        self.m_ema_out = [None, None, None]
+
+        self.thread_ema_update = threading.Thread(target=self.update)
+        self.thread_ema_update.daemon = True
+        self.thread_ema_update.start()
+
+    def __del__(self):
+        ...
+
+    def get_ema(self):
+        return self.m_ema_out
+
+    def get_raw(self):
+        return self.m_raw
+
+    def update(self):
+        while True:
+            # sometimes the i2c bus gets stuck so we need to try again
+            try:
+                self.m_raw = self.m_sensor.euler_angles()
+            except OSError as e:
+                print(f'[Orientation] OSError {e}, trying again...')
+                time.sleep(0.1)
+                continue
+
+            # stepping through each axes' EMA and updating it
+            for i in range(3):
+                self.m_ema_xyz[i].update(self.m_raw[i])
+                self.m_ema_out = [self.m_ema_xyz[0].get(), 
+                                  self.m_ema_xyz[1].get(), 
+                                  self.m_ema_xyz[2].get()]
+            time.sleep(0.1)
+
+# ----------------------------------------------------------------------------- #
+# by:           Marco Tan, Emily Attai
+# last updated: 2023-02-25
+# description:  code to detect gestures from orientation xyz data
+
+# enum class for gestures make code more readable (vs. using numbers)
+class Head_Position(IntEnum):
+    MOVE_FORWARD    = 0
+    MOVE_BACKWARD   = 1
+    MOVE_RIGHT      = 2
+    MOVE_LEFT       = 3 
+    MOVE_STOP       = 4
+
+# class to detect gestures from orientation xyz data
+class Gestures():
+    def __init__(self, p_config_file, p_gesture_window_time):
+        # configerations
+        self.m_gestures = {}
+        self.m_gesture_window_len = p_gesture_window_time
+
+        # load gestures from json config file
+        with open(p_config_file, "r") as f:
+            gestures = (json.load(f))["gestures"]
+            for i in gestures:
+                gestureEnum = Head_Position(gestures[i]["__enum__"])
+                self.m_gestures[gestureEnum] = gestures[i]
+                del self.m_gestures[gestureEnum]["__enum__"]
+
+        # internal values
+        self.m_head_position = Head_Position.MOVE_STOP
+        self.m_internal_orientation = {}
+        self.m_internal_xyz = [0, 0, 0]
+        self.m_largest_direction_xyz = [0, 0, 0]
+        self.m_prev_vector = 0
+        self.m_count = 0
+
+        # for threading of internal values (because we want concurrent updating)
+        self.m_update_internal_thread = threading.Thread(target=self.update_internal_values)
+        self.m_update_internal_thread.daemon = True
+        self.m_update_internal_thread_running = False
+        self.m_update_internal_thread.start()
+
+        # for threading of gesture output
+        self.m_update_gesture_thread = threading.Thread(target=self.update_gesture_output)
+        self.m_update_gesture_thread.daemon = True
+        self.m_update_gesture_thread_running = True
+        self.m_update_gesture_thread.start()
+
+    def __del__(self):
+        self.m_update_internal_thread_running = False
+        self.m_update_gesture_thread_running = False
+
+    def get(self):
+        return self.m_head_position
+    
+    # must convert to strings for output to console
+    def get_status(self):
+        if self.m_head_position == Head_Position.MOVE_FORWARD:
+            return "FORWARD"
+        elif self.m_head_position == Head_Position.MOVE_BACKWARD:
+            return "BACKWARD"
+        elif self.m_head_position == Head_Position.MOVE_RIGHT:
+            return "RIGHT"
+        elif self.m_head_position == Head_Position.MOVE_LEFT:
+            return "LEFT"
+        elif self.m_head_position == Head_Position.MOVE_STOP:
+            return "STOP"
+
+    def set_xyz(self, p_xyz):
+        self.m_internal_xyz = p_xyz
+
+    def update_internal_values(self):
+        while True:
+            if self.m_update_internal_thread_running == False:
+                # reset internal values when not updating
+                self.m_largest_direction_xyz = [0, 0, 0]
+                self.m_prev_vector = 0
+                self.m_count = 0
+            else:
+                # find largest direction between Y and Z (X is not used)
+                for i in range(1, 3):
+                    vector = self.m_internal_xyz[i]
+                    vector = vector if vector is not None else 0
+
+                    if abs(vector) > abs(self.m_prev_vector):
+                        self.m_largest_direction_xyz = [0, 0, 0]
+                        self.m_largest_direction_xyz[i] = math.copysign(1, vector)
+                        self.m_prev_vector = vector
+
+                # check if gesture is detected
+                for i in self.m_gestures:
+                    gesture = self.m_gestures[i]
+
+                    direction_test = (gesture["direction"] == self.m_largest_direction_xyz)
+
+                    # get index of 1 or -1 in gesture
+                    vector_index = gesture["direction"].index(1) if 1 in gesture["direction"] \
+                                   else gesture["direction"].index(-1)
+                    vector = self.m_internal_xyz[vector_index]
+                    vector = vector if vector is not None else 0
+
+                    threshold_test = None
+                    if gesture["direction"][vector_index] == 1:
+                        threshold_test = (vector > gesture["threshold"])
+                    else:
+                        threshold_test = (vector < gesture["threshold"])
+                    
+                    if direction_test and threshold_test:
+                        # increment once on new falling edge
+                        if self.m_count == 0:
+                            self.m_count += 1
+                        break
+
+                # output internal values using a dictionary for easier reading
+                self.m_internal_orientation = {
+                    "direction": self.m_largest_direction_xyz,
+                    "count": self.m_count
+                }
+
+            time.sleep(0.1)
+
+    def update_gesture_output(self):
+        while self.m_update_gesture_thread_running:
+            # update internal values every gesture window length
+            self.m_update_internal_thread_running = True
+            time.sleep(self.m_gesture_window_len)
+            self.m_update_internal_thread_running = False
+
+            # set the default position in case no gesture is detected
+            self.m_head_position = Head_Position.MOVE_STOP
+
+            for i in self.m_gestures:
+                if self.m_internal_orientation == None:
+                    break
+
+                gesture = self.m_gestures[i]
+                direction_test = (gesture["direction"] == self.m_internal_orientation["direction"])
+                count_test = (gesture["count"] == self.m_internal_orientation["count"])
+
+                if direction_test and count_test:
+                    self.m_head_position = Head_Position(i)
+                    break
+
+            time.sleep(0.1)
+
+# ----------------------------------------------------------------------------- #
+# by:           Marco Tan, Emily Attai
+# last updated: 2023-02-25
+# description:  code for stepper motors and stepper activation
+
+# class to control stepper motors using ULN2003 stepper motor driver
+class Stepper_Driver():
+    def __init__(self, p_pins: list, p_step_time, p_reversed = False):
+        self.m_pins = p_pins
+        self.m_step_time = p_step_time
+        self.m_steps = 0
+        self.m_sequence = 0
+        self.m_reverse = p_reversed
+
+        GPIO.setmode(GPIO.BCM)
+        for pin in self.m_pins:
+            GPIO.setup(pin, GPIO.OUT)
+            GPIO.output(pin, GPIO.LOW)
+
+        # constants for controlling stepper motor driver
+        self.m_c_STEPPER_MAX_STEPS = 1024
+        self.m_c_STEPPER_STEP_SEQUENCE = [
+            [1, 0, 0, 1],
+            [1, 0, 0, 0],
+            [1, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 1, 1, 0],
+            [0, 0, 1, 0],
+            [0, 0, 1, 1],
+            [0, 0, 0, 1]
+        ]
+
+    def __del__(self):
+        for pin in self.m_pins:
+            GPIO.output(pin, GPIO.LOW)
+        GPIO.cleanup(self.m_pins)
+
+    def get_steps(self):
+        return self.m_steps
+    
+    def step(self, p_steps):
+        default_reverse = self.m_reverse
+
+        # check to see if the next command will reverse the motor
+        if p_steps < 0:
+            self.m_reverse = not self.m_reverse
+        elif p_steps > 0 or p_steps == 0:
+            pass
+        else:
+            raise Exception(f'[Stepper_Driver] Invalid step value: {p_steps}')
+            
+        # check to see if the next command will exceed the max steps
+        if abs(self.m_steps + p_steps) > self.m_c_STEPPER_MAX_STEPS:
+            print(f'[Stepper_Driver] Max steps exceeded: {self.m_steps + p_steps} > {self.m_c_STEPPER_MAX_STEPS}')
+            self.m_reverse = default_reverse
+            return
+
+        # step the motor the specified number of steps in the specified direction
+        for _ in range(abs(p_steps)):
+            for pin in range(4):
+                GPIO.output(self.m_pins[pin], self.m_c_STEPPER_STEP_SEQUENCE[self.m_sequence][pin])
+            if self.m_reverse:
+                self.m_sequence = (self.m_sequence - 1) % 8
+            elif not self.m_reverse:
+                self.m_sequence = (self.m_sequence + 1) % 8
+            else:
+                raise Exception(f'[Stepper_Driver] Invalid reverse value: {self.m_reverse}]')
+            
+            self.m_steps += math.copysign(1, p_steps)
+            time.sleep(self.m_step_time)
+
+        self.m_reverse = default_reverse
+
+# class to signal stepper drivers based on gesture commands
+class Stepper_Gesture():
+    def __init__(self, p_stepper_drive1, p_stepper_drive2, p_update_speed):
+        self.m_current_head_position = Head_Position.MOVE_STOP
+        self.m_head_position = Head_Position.MOVE_STOP
+        self.m_stepper_drive1 = p_stepper_drive1
+        self.m_stepper_drive2 = p_stepper_drive2
+        self.m_update_speed = p_update_speed
+        self.m_x_steps = 0
+        self.m_z_steps = 0
+
+        # constants
+        self.m_c_STEPPER_MAX_STEPS = 1024
+        self.m_c_STEPPER_X_CNTR_TO_FRONT = -1.0
+        self.m_c_STEPPER_Z_CNTR_TO_LEFT = 1.0
+        self.m_c_STEPPER_Z_CNTR_TO_RIGHT = -1.0
+        self.m_c_STEPPER_X_CNTR_TO_BACK = 1.0
+
+        # start thread to update stepper motor positions
+        self.m_thread_stepper_gesture = threading.Thread(target=self.update)
+        self.m_thread_stepper_gesture.daemon = True
+        self.m_thread_stepper_gesture.start()
+
+    def __del__(self):
+        pass
+
+    def set_head_position(self, p_head_position):
+        self.m_head_position = p_head_position
+
+    # we're returning the amount of steps taken for x and z
+    def get_status(self):
+        return [self.m_x_steps, self.m_z_steps]
+
+    # thread to update stepper motor positions
+    def update(self):
+        while True:
+            self.m_x_steps = self.m_stepper_drive1.get_steps()
+            self.m_z_steps = self.m_stepper_drive2.get_steps()
+
+            target_x_steps = 0
+            target_z_steps = 0
+
+            if self.m_head_position == Head_Position.MOVE_LEFT:
+                target_z_steps = self.m_c_STEPPER_Z_CNTR_TO_LEFT * self.m_c_STEPPER_MAX_STEPS
+            elif self.m_head_position == Head_Position.MOVE_RIGHT:
+                target_z_steps = self.m_c_STEPPER_Z_CNTR_TO_RIGHT * self.m_c_STEPPER_MAX_STEPS
+            elif self.m_head_position == Head_Position.MOVE_FORWARD:
+                target_x_steps = self.m_c_STEPPER_X_CNTR_TO_FRONT * self.m_c_STEPPER_MAX_STEPS
+            elif self.m_head_position == Head_Position.MOVE_BACKWARD:
+                target_x_steps = self.m_c_STEPPER_X_CNTR_TO_BACK * self.m_c_STEPPER_MAX_STEPS
+            elif self.m_head_position == Head_Position.MOVE_STOP:
+                pass
+
+            x_steps = target_x_steps - self.m_x_steps
+            z_steps = target_z_steps - self.m_z_steps
+
+            self.m_stepper_drive1.step(int(x_steps))
+            self.m_stepper_drive2.step(int(z_steps))
+
+            time.sleep(self.m_update_speed)
+
+# ----------------------------------------------------------------------------- #
+# by:           Marco Tan, Emily Attai
+# last updated: 2023-02-25
+# description:  code for vibration motor and vibration activation
+
+# wrapper class to play buzzer patterns
+class Buzzer_Wrapper():
+    def __init__(self, p_buzzer_pin):
+        self.m_buzzer = Buzzer(p_buzzer_pin)
+        
+        # constants
+        self.m_c_BUZZER_PATTERNS = {
+            ".": 0.1,
+            "-": 0.3,
+            " ": 0.1
+        }
+        self.m_c_BUZZER_DELAY = 0.1
+        self.m_buzzer.off()
+
+    def __del__(self):
+        self.m_buzzer.off()
+
+    # wowee we can play morse code now, isn't that cool?
+    def play_pattern(self, p_pattern):
+        for char in p_pattern:
+            if char in ".-":
+                self.m_buzzer.on()
+                time.sleep(self.m_c_BUZZER_PATTERNS[char])
+                self.m_buzzer.off()
+                time.sleep(self.m_c_BUZZER_DELAY)
+            elif char == " ":
+                time.sleep(self.m_c_BUZZER_PATTERNS[char])
+            else:
+                raise Exception(f'[Buzzer_Wrapper] Invalid pattern: {p_pattern}]')
+
+# class to control vibration motor from gestures
+class Vibration():
+    def __init__(self, p_buzzer_pin, p_loop_delay):
+        self.m_buzzer = Buzzer_Wrapper(p_buzzer_pin)
+        self.m_head_position = Head_Position.MOVE_STOP
+        self.m_loop_delay = p_loop_delay
+        
+        # for threading of user alert w/ vibration motor
+        self.thread_user_alert = threading.Thread(target=self.user_alert)
+        self.thread_user_alert.daemon = True
+        self.thread_user_alert.start()
+
+    def __del__(self):
+        pass
+
+    def set_head_position(self, p_head_position):
+        self.m_head_position = p_head_position
+
+    # format what pattern to play b/c we need strings for console output
+    def get_status(self):
+        if self.m_head_position == Head_Position.MOVE_FORWARD:
+            return "FORWARD"
+        elif self.m_head_position == Head_Position.MOVE_BACKWARD:
+            return "BACKWARD"
+        elif self.m_head_position == Head_Position.MOVE_RIGHT:
+            return "RIGHT"
+        elif self.m_head_position == Head_Position.MOVE_LEFT:
+            return "LEFT"
+        elif self.m_head_position == Head_Position.MOVE_STOP:
+            return "STOP"
+
+    # thread to play buzzer patterns
+    def user_alert(self):
+        while True:
+            if self.m_head_position == Head_Position.MOVE_FORWARD:
+                self.m_buzzer.play_pattern("-")
+            elif self.m_head_position == Head_Position.MOVE_BACKWARD:
+                self.m_buzzer.play_pattern("--")
+            elif self.m_head_position == Head_Position.MOVE_RIGHT:
+                self.m_buzzer.play_pattern(".")
+            elif self.m_head_position == Head_Position.MOVE_LEFT:
+                self.m_buzzer.play_pattern("..")
+            elif self.m_head_position == Head_Position.MOVE_STOP:
+                self.m_buzzer.play_pattern("...")
+
+            time.sleep(self.m_loop_delay)
 
 # ----------------------------------------------------------------------------- #
 
