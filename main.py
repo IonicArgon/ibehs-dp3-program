@@ -8,6 +8,19 @@ from sensor_library import Orientation_Sensor
 from enum import IntEnum
 from gpiozero import Buzzer
 
+# note from the programmers:
+# 
+# we think that putting all the code in one file defeats the purpose of object
+# oriented programming, but since it is a requirement for the project, we have
+# decided to put all the code in one file. we have tried to make the code as
+# readable as possible, and have added comments to explain what each part does,
+# but we think this could've been avoided if we were allowed to use multiple
+# files. we hope you understand.
+#
+# p.s. you will have to run the code in console; IDLE does not support
+#      multithreading and will not work. we have tested the code on a raspberry
+#      pi 4 and it works fine.
+
 # ----------------------------------------------------------------------------- #
 # by:           Marco Tan, Emily Attai
 # last updated: 2023-02-25
