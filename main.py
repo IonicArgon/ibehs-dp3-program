@@ -16,10 +16,14 @@ from gpiozero import Buzzer
 # readable as possible, and have added comments to explain what each part does,
 # but we think this could've been avoided if we were allowed to use multiple
 # files. we hope you understand.
+# 
+# p.s.1: b/c of the nature of the design, we made extensive use of threading to
+#        make the code run concurrently. this is why there are so many classes
+#        for organization purposes
 #
-# p.s. you will have to run the code in console; IDLE does not support
-#      multithreading and will not work. we have tested the code on a raspberry
-#      pi 4 and it works fine.
+# p.s.2: you will have to run the code in console; IDLE does not support
+#        multithreading and will not work. we have tested the code on a raspberry
+#        pi 4 and it works fine. use python version 3.9.x or higher.
 
 # ----------------------------------------------------------------------------- #
 # by:           Marco Tan, Emily Attai
@@ -34,15 +38,21 @@ class EMA:
         self.m_window_size = p_window_size
         self.m_round = p_round
 
+    # set alpha value (the alpha value is the weight given to the most recent
+    # data point. the higher the alpha value, the more weight is given to the
+    # most recent data point.)
     def set_alpha(self, p_alpha):
         self.m_alpha = p_alpha
 
+    # set window size (the window size is the number of data points used to
+    # calculate the average)
     def set_window_size(self, p_window_size):
         self.m_window_size = p_window_size
 
     def get(self):
         return self.m_out
 
+    # update the EMA with a new data point
     def update(self, p_in):
         # make sure our number is always a float
         self.m_window.append(float(p_in or 0.0))
@@ -93,6 +103,7 @@ class Orientation():
             # sometimes the i2c bus gets stuck so we need to try again
             try:
                 self.m_raw = self.m_sensor.euler_angles()
+            # if we get an OSError, try again
             except OSError as e:
                 print(f'[Orientation] OSError {e}, trying again...')
                 time.sleep(0.1)
@@ -126,7 +137,9 @@ class Gestures():
         self.m_gestures = {}
         self.m_gesture_window_len = p_gesture_window_time
 
-        # load gestures from json config file
+        # load gestures from json config file.
+        # it loads the json as a dictionary and then we can index it
+        # to get the values
         with open(p_config_file, "r") as f:
             gestures = (json.load(f))["gestures"]
             for i in gestures:
@@ -154,6 +167,8 @@ class Gestures():
         self.m_update_gesture_thread_running = True
         self.m_update_gesture_thread.start()
 
+    # we pause the threads if the object is about to be cleaned up b/c we don't
+    # want to run the threads after the object is deleted
     def __del__(self):
         self.m_update_internal_thread_running = False
         self.m_update_gesture_thread_running = False
@@ -161,7 +176,8 @@ class Gestures():
     def get(self):
         return self.m_head_position
     
-    # must convert to strings for output to console
+    # must convert to strings for output to console because python 
+    # print enums as strings, but as integers
     def get_status(self):
         if self.m_head_position == Head_Position.MOVE_FORWARD:
             return "FORWARD"
@@ -195,10 +211,11 @@ class Gestures():
                         self.m_largest_direction_xyz[i] = math.copysign(1, vector)
                         self.m_prev_vector = vector
 
-                # check if gesture is detected
+                # scan through possible gestures and see if any are detected
                 for i in self.m_gestures:
                     gesture = self.m_gestures[i]
 
+                    # check if direction is the same
                     direction_test = (gesture["direction"] == self.m_largest_direction_xyz)
 
                     # get index of 1 or -1 in gesture
@@ -207,12 +224,14 @@ class Gestures():
                     vector = self.m_internal_xyz[vector_index]
                     vector = vector if vector is not None else 0
 
+                    # check if threshold is crossed
                     threshold_test = None
                     if gesture["direction"][vector_index] == 1:
                         threshold_test = (vector > gesture["threshold"])
                     else:
                         threshold_test = (vector < gesture["threshold"])
                     
+                    # if both tests pass, then gesture is detected
                     if direction_test and threshold_test:
                         # increment once on new falling edge
                         if self.m_count == 0:
@@ -237,6 +256,7 @@ class Gestures():
             # set the default position in case no gesture is detected
             self.m_head_position = Head_Position.MOVE_STOP
 
+            # scan through possible gestures to see which one is detected
             for i in self.m_gestures:
                 if self.m_internal_orientation == None:
                     break
@@ -256,7 +276,7 @@ class Gestures():
 # last updated: 2023-02-25
 # description:  code for stepper motors and stepper activation
 
-# class to control stepper motors using ULN2003 stepper motor driver
+# class to control stepper motors using a ULN2003 stepper motor driver
 class Stepper_Driver():
     def __init__(self, p_pins: list, p_step_time, p_reversed = False):
         self.m_pins = p_pins
@@ -297,7 +317,7 @@ class Stepper_Driver():
         # check to see if the next command will reverse the motor
         if p_steps < 0:
             self.m_reverse = not self.m_reverse
-        elif p_steps > 0 or p_steps == 0:
+        elif p_steps >= 0:
             pass
         else:
             raise Exception(f'[Stepper_Driver] Invalid step value: {p_steps}')
