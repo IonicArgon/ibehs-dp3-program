@@ -622,7 +622,18 @@ def main():
     global vibration
 
     # stuff for matplotlib
+    fig, ax = plt.subplots(3, 1)
+    
+    raw_x = deque([0.0] * 100, maxlen=100)
+    raw_y = deque([0.0] * 100, maxlen=100)
     raw_z = deque([0.0] * 100, maxlen=100)
+
+    ema_x = deque([0.0] * 100, maxlen=100)
+    ema_y = deque([0.0] * 100, maxlen=100)
+    ema_z = deque([0.0] * 100, maxlen=100)
+
+
+
 
     # get gesture from orientation sensor data, send to stepper and vibration functions
     while True:
@@ -630,19 +641,37 @@ def main():
         stepper_ctrl.set_head_position(p_head_position=gestures.get())
         vibration.set_head_position(p_head_position=gestures.get())
 
-        # stop the code if figure is closed
-        if plt.fignum_exists(1) == False:
-            break
-
-        # update raw x data
+        # update all data
+        raw_x.append(orientation.get_raw()[0])
+        raw_y.append(orientation.get_raw()[1])
         raw_z.append(orientation.get_raw()[2])
-        plt.plot(raw_z)
-        plt.scatter(range(len(raw_z)), raw_z)
+
+        ema_x.append(orientation.get_ema()[0])
+        ema_y.append(orientation.get_ema()[1])
+        ema_z.append(orientation.get_ema()[2])
+
+        # plot raw x and ema x data
+        ax[0].plot(ema_x)
+        ax[0].scatter(range(len(ema_x)), ema_x)
+        ax[0].plot(raw_x)
+        ax[0].scatter(range(len(raw_x)), raw_x)
+
+        # plot raw y and ema y data
+        ax[1].plot(ema_y)
+        ax[1].scatter(range(len(ema_y)), ema_y)
+        ax[1].plot(raw_y)
+        ax[1].scatter(range(len(raw_y)), raw_y)
+
+        # plot raw z and ema z data
+        ax[2].plot(ema_z)
+        ax[2].scatter(range(len(ema_z)), ema_z)
+        ax[2].plot(raw_z)
+        ax[2].scatter(range(len(raw_z)), raw_z)
 
         # update plot
-        plt.draw()
+        fig.draw()
         plt.pause(MAIN_DELAY)
-        plt.clf()
+        fig.clf()
 
 
 if __name__ == "__main__":
