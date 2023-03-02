@@ -647,6 +647,10 @@ def main():
     ema_y = deque([0.0] * 100, maxlen=100)
     ema_z = deque([0.0] * 100, maxlen=100)
 
+    # align plot to upper right corner
+    manager = plt.get_current_fig_manager()
+    manager.window.wm_geometry("+0+0")
+
     # get gesture from orientation sensor data, send to stepper and vibration functions
     while True:
         gestures.set_xyz(p_xyz=orientation.get_ema())
