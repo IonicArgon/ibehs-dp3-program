@@ -621,22 +621,19 @@ def main():
     global stepper_ctrl
     global vibration
 
-    # matplotlib related variables because matplotlib looks so cool
-    fig, ax = plt.subplots(nrows=3, ncols=1)
-    # list of queues for raw data
-    raw_xyz_queues = [
-        deque(maxlen=100),
-        deque(maxlen=100),
-        deque(maxlen=100)
-    ]
-    # list of queues for ema data
-    ema_xyz_queues = [
-        deque(maxlen=100),
-        deque(maxlen=100),
-        deque(maxlen=100)
-    ]
+    # stuff for matplotlib
+    fig, axs = plt.subplots(3, 1)
+    fig.suptitle("Orientation Data")
+    fig.canvas.set_window_title("Orientation Data")
+    fig.set_size_inches(10, 6)
+    fig.tight_layout(pad=3.0)
 
-
+    raw_x_data = deque([0] * 100, maxlen=100)
+    raw_y_data = deque([0] * 100, maxlen=100)
+    raw_z_data = deque([0] * 100, maxlen=100)
+    ema_x_data = deque([0] * 100, maxlen=100)
+    ema_y_data = deque([0] * 100, maxlen=100)
+    ema_z_data = deque([0] * 100, maxlen=100)
 
     # get gesture from orientation sensor data, send to stepper and vibration functions
     while True:
@@ -644,28 +641,27 @@ def main():
         stepper_ctrl.set_head_position(p_head_position=gestures.get())
         vibration.set_head_position(p_head_position=gestures.get())
 
-        # # this part here is extra because matplotlib just looks cool
-        # # add data to queues
-        # xyz_ema = orientation.get_ema()
-        # xyz_raw = orientation.get_raw()
+        # make matplotlib plots
+        axs[0].clear()
+        axs[0].set_title("Raw Data")
+        axs[0].set_ylabel("Degrees")
+        axs[0].plot(raw_x_data, label="X")
+        axs[0].plot(raw_y_data, label="Y")
+        axs[0].plot(raw_z_data, label="Z")
 
-        # xyz_ema = xyz_list_parse(xyz_ema)
-        # xyz_raw = xyz_list_parse(xyz_raw)
-
-        # for i in range(3):
-        #     raw_xyz_queues[i].append(xyz_raw[i])
-        #     ema_xyz_queues[i].append(xyz_ema[i])
-
-        # # now plot
-        # for i in range(3):
-        #     ax[i].plot(raw_xyz_queues, label="Raw")
-        #     ax[i].plot(ema_xyz_queues, label="EMA")
-        #     ax[i].scatter(range(len(raw_xyz_queues)), raw_xyz_queues)
-        #     ax[i].scatter(range(len(ema_xyz_queues)), ema_xyz_queues)
-        #     plt.draw()
+        axs[1].clear()
+        axs[1].set_title("EMA Data")
+        axs[1].set_ylabel("Degrees")
+        axs[1].plot(ema_x_data, label="X")
+        axs[1].plot(ema_y_data, label="Y")
+        axs[1].plot(ema_z_data, label="Z")
 
         time.sleep(MAIN_DELAY)
-        # plt.clf()
+
+        # redraw plots
+        fig.canvas.draw()
+        fig.canvas.flush_events()
+
 
 if __name__ == "__main__":
     print("We recommend setting your terminal to full screen to see the data better.")
