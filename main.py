@@ -621,9 +621,24 @@ def main():
     global stepper_ctrl
     global vibration
 
-    # stuff for matplotlib
+    # setting up matplotlib because graphs are cool
     fig, ax = plt.subplots(3, 1)
+    fig.suptitle("Orientation Sensor Data")
+    fig.set_size_inches(6, 10)
+
+    ax[0].set_title("X Axis")
+    ax[0].set_xlabel("Time (s)")
+    ax[0].set_ylabel("Degrees (°)")
+
+    ax[1].set_title("Y Axis")
+    ax[1].set_xlabel("Time (s)")
+    ax[1].set_ylabel("Degrees (°)")
+
+    ax[2].set_title("Z Axis")
+    ax[2].set_xlabel("Time (s)")
+    ax[2].set_ylabel("Degrees (°)")
     
+    # for storing our orientation data
     raw_x = deque([0.0] * 100, maxlen=100)
     raw_y = deque([0.0] * 100, maxlen=100)
     raw_z = deque([0.0] * 100, maxlen=100)
@@ -648,22 +663,25 @@ def main():
         ema_z.append(orientation.get_ema()[2])
 
         # plot raw x and ema x data
-        ax[0].plot(ema_x)
+        ax[0].plot(ema_x, label="Smoothed")
         ax[0].scatter(range(len(ema_x)), ema_x)
-        ax[0].plot(raw_x)
+        ax[0].plot(raw_x, label="Raw")
         ax[0].scatter(range(len(raw_x)), raw_x)
+        ax[0].legend()
 
         # plot raw y and ema y data
-        ax[1].plot(ema_y)
+        ax[1].plot(ema_y, label="Smoothed")
         ax[1].scatter(range(len(ema_y)), ema_y)
-        ax[1].plot(raw_y)
+        ax[1].plot(raw_y, label="Raw")
         ax[1].scatter(range(len(raw_y)), raw_y)
+        ax[1].legend()
 
         # plot raw z and ema z data
-        ax[2].plot(ema_z)
+        ax[2].plot(ema_z, label="Smoothed")
         ax[2].scatter(range(len(ema_z)), ema_z)
-        ax[2].plot(raw_z)
+        ax[2].plot(raw_z, label="Raw")
         ax[2].scatter(range(len(raw_z)), raw_z)
+        ax[2].legend()
 
         # update plot
         fig.canvas.draw_idle()
