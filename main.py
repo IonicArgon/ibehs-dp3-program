@@ -625,18 +625,6 @@ def main():
     fig, ax = plt.subplots(3, 1)
     fig.suptitle("Orientation Sensor Data")
     fig.set_size_inches(6, 10)
-
-    ax[0].set_title("X Axis")
-    ax[0].set_xlabel("Time (s)")
-    ax[0].set_ylabel("Degrees (°)")
-
-    ax[1].set_title("Y Axis")
-    ax[1].set_xlabel("Time (s)")
-    ax[1].set_ylabel("Degrees (°)")
-
-    ax[2].set_title("Z Axis")
-    ax[2].set_xlabel("Time (s)")
-    ax[2].set_ylabel("Degrees (°)")
     
     # for storing our orientation data
     PLOT_SIZE = 20
@@ -688,6 +676,19 @@ def main():
         ax[2].plot(raw_z, label="Raw")
         ax[2].scatter(range(len(raw_z)), raw_z)
         ax[2].legend()
+
+        # setting axis labels and titles    
+        ax[0].set_title("X Axis")
+        ax[0].set_xlabel("Time (s)")
+        ax[0].set_ylabel("Degrees (°)")
+
+        ax[1].set_title("Y Axis")
+        ax[1].set_xlabel("Time (s)")
+        ax[1].set_ylabel("Degrees (°)")
+
+        ax[2].set_title("Z Axis")
+        ax[2].set_xlabel("Time (s)")
+        ax[2].set_ylabel("Degrees (°)")
 
         # update plot
         fig.canvas.draw_idle()
