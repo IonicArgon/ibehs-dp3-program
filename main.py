@@ -558,21 +558,6 @@ def console_output_fn():
     global stepper_ctrl
     global vibration
 
-    # matplotlib related variables because matplotlib looks so cool
-    fig, ax = plt.subplots(nrows=3, ncols=1)
-    # list of queues for raw data
-    raw_xyz_queues = [
-        deque(maxlen=100),
-        deque(maxlen=100),
-        deque(maxlen=100)
-    ]
-    # list of queues for ema data
-    ema_xyz_queues = [
-        deque(maxlen=100),
-        deque(maxlen=100),
-        deque(maxlen=100)
-    ]
-
     # main loop
     while True:
         # print header every 10 iterations
@@ -616,24 +601,8 @@ def console_output_fn():
         print(outputString)
         header_counter += 1
 
-        # this part here is extra because matplotlib just looks cool
-        # add data to queues
-        for i in range(3):
-            raw_xyz_queues[i].append(xyz_raw[i])
-            ema_xyz_queues[i].append(xyz_ema[i])
-
-        # now plot
-        for i in range(3):
-            ax[i, 0].plot(raw_xyz_queues, label="Raw")
-            ax[i, 0].plot(ema_xyz_queues, label="EMA")
-            ax[i, 0].scatter(range(len(raw_xyz_queues)), raw_xyz_queues)
-            ax[i, 0].scatter(range(len(ema_xyz_queues)), ema_xyz_queues)
-            plt.draw()
-
         # pause to allow plot to update
         time.sleep(PRINT_DELAY)
-
-        plt.clf()
 
 # ----------------------------------------------------------------------------- #
 
@@ -652,12 +621,51 @@ def main():
     global stepper_ctrl
     global vibration
 
+    # matplotlib related variables because matplotlib looks so cool
+    fig, ax = plt.subplots(nrows=3, ncols=1)
+    # list of queues for raw data
+    raw_xyz_queues = [
+        deque(maxlen=100),
+        deque(maxlen=100),
+        deque(maxlen=100)
+    ]
+    # list of queues for ema data
+    ema_xyz_queues = [
+        deque(maxlen=100),
+        deque(maxlen=100),
+        deque(maxlen=100)
+    ]
+
+
+
     # get gesture from orientation sensor data, send to stepper and vibration functions
     while True:
         gestures.set_xyz(p_xyz=orientation.get_ema())
         stepper_ctrl.set_head_position(p_head_position=gestures.get())
         vibration.set_head_position(p_head_position=gestures.get())
+
+        # this part here is extra because matplotlib just looks cool
+        # add data to queues
+        xyz_ema = orientation.get_ema()
+        xyz_raw = orientation.get_raw()
+
+        xyz_ema = xyz_list_parse(xyz_ema)
+        xyz_raw = xyz_list_parse(xyz_raw)
+
+        for i in range(3):
+            raw_xyz_queues[i].append(xyz_raw[i])
+            ema_xyz_queues[i].append(xyz_ema[i])
+
+        # now plot
+        for i in range(3):
+            ax[i].plot(raw_xyz_queues, label="Raw")
+            ax[i].plot(ema_xyz_queues, label="EMA")
+            ax[i].scatter(range(len(raw_xyz_queues)), raw_xyz_queues)
+            ax[i].scatter(range(len(ema_xyz_queues)), ema_xyz_queues)
+            plt.draw()
+
         time.sleep(MAIN_DELAY)
+        plt.clf()
 
 if __name__ == "__main__":
     print("We recommend setting your terminal to full screen to see the data better.")
