@@ -632,9 +632,6 @@ def main():
     ema_y = deque([0.0] * 100, maxlen=100)
     ema_z = deque([0.0] * 100, maxlen=100)
 
-
-
-
     # get gesture from orientation sensor data, send to stepper and vibration functions
     while True:
         gestures.set_xyz(p_xyz=orientation.get_ema())
@@ -671,7 +668,9 @@ def main():
         # update plot
         fig.canvas.draw_idle()
         plt.pause(MAIN_DELAY)
-        fig.clf()
+        ax[0].clear()
+        ax[1].clear()
+        ax[2].clear()
 
 
 if __name__ == "__main__":
