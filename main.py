@@ -13,6 +13,8 @@ import RPi.GPIO as GPIO # type: ignore[import]
 from sensor_library import Orientation_Sensor
 from enum import IntEnum
 from gpiozero import Buzzer
+from collections import deque
+import matplotlib.pyplot as plt
 
 # note from the programmers:
 # 
@@ -30,6 +32,10 @@ from gpiozero import Buzzer
 # p.s.2: you will have to run the code in console; IDLE does not support
 #        multithreading and will not work. we have tested the code on a raspberry
 #        pi 4 and it works fine. use python version 3.9.x or higher.
+#
+# required packages:
+#   - matplotlib
+#   - gpiozero
 
 # ----------------------------------------------------------------------------- #
 # by:           Marco Tan (tanm27, 400433483)
@@ -552,6 +558,21 @@ def console_output_fn():
     global stepper_ctrl
     global vibration
 
+    # matplotlib related variables because matplotlib looks so cool
+    fig, ax = plt.subplots(nrows=3, ncols=1)
+    # list of queues for raw data
+    raw_xyz_queues = [
+        deque(maxlen=100),
+        deque(maxlen=100),
+        deque(maxlen=100)
+    ]
+    # list of queues for ema data
+    ema_xyz_queues = [
+        deque(maxlen=100),
+        deque(maxlen=100),
+        deque(maxlen=100)
+    ]
+
     # main loop
     while True:
         # print header every 10 iterations
@@ -594,7 +615,25 @@ def console_output_fn():
                        f'{vibration_now:^{COLUMN_WIDTH}}|'
         print(outputString)
         header_counter += 1
+
+        # this part here is extra because matplotlib just looks cool
+        # add data to queues
+        for i in range(3):
+            raw_xyz_queues[i].append(xyz_raw[i])
+            ema_xyz_queues[i].append(xyz_ema[i])
+
+        # now plot
+        for i in range(3):
+            ax[i, 0].plot(raw_xyz_queues, label="Raw")
+            ax[i, 0].plot(ema_xyz_queues, label="EMA")
+            ax[i, 0].scatter(range(len(raw_xyz_queues)), raw_xyz_queues)
+            ax[i, 0].scatter(range(len(ema_xyz_queues)), ema_xyz_queues)
+            plt.draw()
+
+        # pause to allow plot to update
         time.sleep(PRINT_DELAY)
+
+        plt.clf()
 
 # ----------------------------------------------------------------------------- #
 
