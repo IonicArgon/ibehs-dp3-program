@@ -644,28 +644,28 @@ def main():
         stepper_ctrl.set_head_position(p_head_position=gestures.get())
         vibration.set_head_position(p_head_position=gestures.get())
 
-        # this part here is extra because matplotlib just looks cool
-        # add data to queues
-        xyz_ema = orientation.get_ema()
-        xyz_raw = orientation.get_raw()
+        # # this part here is extra because matplotlib just looks cool
+        # # add data to queues
+        # xyz_ema = orientation.get_ema()
+        # xyz_raw = orientation.get_raw()
 
-        xyz_ema = xyz_list_parse(xyz_ema)
-        xyz_raw = xyz_list_parse(xyz_raw)
+        # xyz_ema = xyz_list_parse(xyz_ema)
+        # xyz_raw = xyz_list_parse(xyz_raw)
 
-        for i in range(3):
-            raw_xyz_queues[i].append(xyz_raw[i])
-            ema_xyz_queues[i].append(xyz_ema[i])
+        # for i in range(3):
+        #     raw_xyz_queues[i].append(xyz_raw[i])
+        #     ema_xyz_queues[i].append(xyz_ema[i])
 
-        # now plot
-        for i in range(3):
-            ax[i].plot(raw_xyz_queues, label="Raw")
-            ax[i].plot(ema_xyz_queues, label="EMA")
-            ax[i].scatter(range(len(raw_xyz_queues)), raw_xyz_queues)
-            ax[i].scatter(range(len(ema_xyz_queues)), ema_xyz_queues)
-            plt.draw()
+        # # now plot
+        # for i in range(3):
+        #     ax[i].plot(raw_xyz_queues, label="Raw")
+        #     ax[i].plot(ema_xyz_queues, label="EMA")
+        #     ax[i].scatter(range(len(raw_xyz_queues)), raw_xyz_queues)
+        #     ax[i].scatter(range(len(ema_xyz_queues)), ema_xyz_queues)
+        #     plt.draw()
 
         time.sleep(MAIN_DELAY)
-        plt.clf()
+        # plt.clf()
 
 if __name__ == "__main__":
     print("We recommend setting your terminal to full screen to see the data better.")
