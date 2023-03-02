@@ -624,7 +624,6 @@ def main():
     # stuff for matplotlib
     fig, axs = plt.subplots(3, 1)
     fig.suptitle("Orientation Data")
-    fig.canvas.set_window_title("Orientation Data")
     fig.set_size_inches(10, 6)
     fig.tight_layout(pad=3.0)
 
