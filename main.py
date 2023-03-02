@@ -630,6 +630,10 @@ def main():
         stepper_ctrl.set_head_position(p_head_position=gestures.get())
         vibration.set_head_position(p_head_position=gestures.get())
 
+        # stop the code if figure is closed
+        if plt.fignum_exists(1) == False:
+            break
+
         # update raw x data
         raw_z.append(orientation.get_raw()[2])
         plt.plot(raw_z)
