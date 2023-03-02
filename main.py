@@ -679,15 +679,15 @@ def main():
 
         # setting axis labels and titles    
         ax[0].set_title("X Axis")
-        ax[0].set_xlabel(None)
+        ax[0].set_xticks([])
         ax[0].set_ylabel("Degrees (°)")
 
         ax[1].set_title("Y Axis")
-        ax[0].set_xlabel(None)
+        ax[0].set_xticks([])
         ax[1].set_ylabel("Degrees (°)")
 
         ax[2].set_title("Z Axis")
-        ax[0].set_xlabel(None)
+        ax[0].set_xticks([])
         ax[2].set_ylabel("Degrees (°)")
 
         # update plot
