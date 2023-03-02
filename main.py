@@ -639,13 +639,15 @@ def main():
     ax[2].set_ylabel("Degrees (°)")
     
     # for storing our orientation data
-    raw_x = deque([0.0] * 100, maxlen=100)
-    raw_y = deque([0.0] * 100, maxlen=100)
-    raw_z = deque([0.0] * 100, maxlen=100)
+    PLOT_SIZE = 20
 
-    ema_x = deque([0.0] * 100, maxlen=100)
-    ema_y = deque([0.0] * 100, maxlen=100)
-    ema_z = deque([0.0] * 100, maxlen=100)
+    raw_x = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
+    raw_y = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
+    raw_z = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
+
+    ema_x = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
+    ema_y = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
+    ema_z = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
 
     # align plot to upper right corner
     manager = plt.get_current_fig_manager()
