@@ -649,7 +649,7 @@ def main():
 
     # align plot to upper right corner
     manager = plt.get_current_fig_manager()
-    manager.window.wm_geometry("+0+0")
+    manager.window.setGeometry(0, 0, 800, 600)
 
     # get gesture from orientation sensor data, send to stepper and vibration functions
     while True:
