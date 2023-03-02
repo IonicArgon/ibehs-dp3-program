@@ -624,10 +624,11 @@ def main():
     # setting up matplotlib because graphs are cool
     fig, ax = plt.subplots(3, 1)
     fig.suptitle("Orientation Sensor Data")
+    fig.tight_layout()
 
     # align plot to upper right corner
     manager = plt.get_current_fig_manager()
-    manager.window.setGeometry(600, 0, 800, 1000)
+    manager.window.setGeometry(1000, 0, 800, 1000)
 
     # for storing our orientation data
     PLOT_SIZE = 20
