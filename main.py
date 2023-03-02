@@ -622,17 +622,7 @@ def main():
     global vibration
 
     # stuff for matplotlib
-    fig, axs = plt.subplots(3, 1)
-    fig.suptitle("Orientation Data")
-    fig.set_size_inches(10, 6)
-    fig.tight_layout(pad=3.0)
-
-    raw_x_data = deque([0] * 100, maxlen=100)
-    raw_y_data = deque([0] * 100, maxlen=100)
-    raw_z_data = deque([0] * 100, maxlen=100)
-    ema_x_data = deque([0] * 100, maxlen=100)
-    ema_y_data = deque([0] * 100, maxlen=100)
-    ema_z_data = deque([0] * 100, maxlen=100)
+    raw_z = deque([0.0] * 100, maxlen=100)
 
     # get gesture from orientation sensor data, send to stepper and vibration functions
     while True:
@@ -640,26 +630,15 @@ def main():
         stepper_ctrl.set_head_position(p_head_position=gestures.get())
         vibration.set_head_position(p_head_position=gestures.get())
 
-        # make matplotlib plots
-        axs[0].clear()
-        axs[0].set_title("Raw Data")
-        axs[0].set_ylabel("Degrees")
-        axs[0].plot(raw_x_data, label="X")
-        axs[0].plot(raw_y_data, label="Y")
-        axs[0].plot(raw_z_data, label="Z")
+        # update raw x data
+        raw_z.append(orientation.get_raw()[2])
+        plt.plot(raw_z)
+        plt.scatter(range(len(raw_z)), raw_z)
 
-        axs[1].clear()
-        axs[1].set_title("EMA Data")
-        axs[1].set_ylabel("Degrees")
-        axs[1].plot(ema_x_data, label="X")
-        axs[1].plot(ema_y_data, label="Y")
-        axs[1].plot(ema_z_data, label="Z")
-
-        time.sleep(MAIN_DELAY)
-
-        # redraw plots
-        fig.canvas.draw()
-        fig.canvas.flush_events()
+        # update plot
+        plt.draw()
+        plt.pause(MAIN_DELAY)
+        plt.clf()
 
 
 if __name__ == "__main__":
