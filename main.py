@@ -624,8 +624,11 @@ def main():
     # setting up matplotlib because graphs are cool
     fig, ax = plt.subplots(3, 1)
     fig.suptitle("Orientation Sensor Data")
-    fig.set_size_inches(6, 10)
-    
+
+    # align plot to upper right corner
+    manager = plt.get_current_fig_manager()
+    manager.window.setGeometry(600, 0, 800, 1000)
+
     # for storing our orientation data
     PLOT_SIZE = 20
 
@@ -636,10 +639,6 @@ def main():
     ema_x = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
     ema_y = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
     ema_z = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
-
-    # align plot to upper right corner
-    manager = plt.get_current_fig_manager()
-    manager.window.setGeometry(0, 0, 800, 600)
 
     # get gesture from orientation sensor data, send to stepper and vibration functions
     while True:
