@@ -1,3 +1,9 @@
+# ----------------------------------------------------------------------------- #
+# by:           Marco Tan (tanm27, 400433483)
+#               Emily Attai (attaie, 400452653)
+# last updated: 2023-02-25
+# description:  reusable code for exponential moving average
+
 # package imports
 import threading
 import time
@@ -26,7 +32,8 @@ from gpiozero import Buzzer
 #        pi 4 and it works fine. use python version 3.9.x or higher.
 
 # ----------------------------------------------------------------------------- #
-# by:           Marco Tan, Emily Attai
+# by:           Marco Tan (tanm27, 400433483)
+#               Emily Attai (attaie, 400452653)
 # last updated: 2023-02-25
 # description:  reusable code for exponential moving average
 class EMA:
@@ -63,13 +70,14 @@ class EMA:
             return
         else:
             self.m_window.pop(0)
-
+        #calculating the average of the window 
         window_avg = round(sum(self.m_window) / self.m_window_size, self.m_round)
         self.m_out = self.m_alpha * window_avg + (1 - self.m_alpha) * self.m_last_out
         self.m_last_out = self.m_out
 
 # ----------------------------------------------------------------------------- #
-# by:           Marco Tan, Emily Attai
+# by:           Marco Tan (tanm27, 400433483)
+#               Emily Attai (attaie, 400452653)
 # last updated: 2023-02-25
 # description:  reading orientation sensor and outputting smoothed data
 
@@ -85,6 +93,7 @@ class Orientation():
         self.m_raw = [None, None, None]
         self.m_ema_out = [None, None, None]
 
+        # for threading of internal values (because we want concurrent updating)
         self.thread_ema_update = threading.Thread(target=self.update)
         self.thread_ema_update.daemon = True
         self.thread_ema_update.start()
@@ -118,7 +127,8 @@ class Orientation():
             time.sleep(0.1)
 
 # ----------------------------------------------------------------------------- #
-# by:           Marco Tan, Emily Attai
+# by:           Marco Tan (tanm27, 400433483)
+#               Emily Attai (attaie, 400452653)
 # last updated: 2023-02-25
 # description:  code to detect gestures from orientation xyz data
 
@@ -133,7 +143,7 @@ class Head_Position(IntEnum):
 # class to detect gestures from orientation xyz data
 class Gestures():
     def __init__(self, p_config_file, p_gesture_window_time):
-        # configerations
+        # configurations
         self.m_gestures = {}
         self.m_gesture_window_len = p_gesture_window_time
 
@@ -147,7 +157,7 @@ class Gestures():
                 self.m_gestures[gestureEnum] = gestures[i]
                 del self.m_gestures[gestureEnum]["__enum__"]
 
-        # internal values
+        # internal values (default/placeholder  values)
         self.m_head_position = Head_Position.MOVE_STOP
         self.m_internal_orientation = {}
         self.m_internal_xyz = [0, 0, 0]
@@ -177,7 +187,7 @@ class Gestures():
         return self.m_head_position
     
     # must convert to strings for output to console because python 
-    # print enums as strings, but as integers
+    # print enums as numbers, not strings
     def get_status(self):
         if self.m_head_position == Head_Position.MOVE_FORWARD:
             return "FORWARD"
@@ -211,7 +221,7 @@ class Gestures():
                         self.m_largest_direction_xyz[i] = math.copysign(1, vector)
                         self.m_prev_vector = vector
 
-                # scan through possible gestures and see if any are detected
+                # scan through possible gestures and see if any changes in the head position are detected
                 for i in self.m_gestures:
                     gesture = self.m_gestures[i]
 
@@ -231,7 +241,7 @@ class Gestures():
                     else:
                         threshold_test = (vector < gesture["threshold"])
                     
-                    # if both tests pass, then gesture is detected
+                    # if both tests pass, then gesture is detected and processed
                     if direction_test and threshold_test:
                         # increment once on new falling edge
                         if self.m_count == 0:
@@ -256,7 +266,7 @@ class Gestures():
             # set the default position in case no gesture is detected
             self.m_head_position = Head_Position.MOVE_STOP
 
-            # scan through possible gestures to see which one is detected
+            # scan through possible gestures that we set to see which one is detected
             for i in self.m_gestures:
                 if self.m_internal_orientation == None:
                     break
@@ -272,7 +282,8 @@ class Gestures():
             time.sleep(0.1)
 
 # ----------------------------------------------------------------------------- #
-# by:           Marco Tan, Emily Attai
+# by:           Marco Tan (tanm27, 400433483)
+#               Emily Attai (attaie, 400452653)
 # last updated: 2023-02-25
 # description:  code for stepper motors and stepper activation
 
@@ -310,7 +321,7 @@ class Stepper_Driver():
 
     def get_steps(self):
         return self.m_steps
-    
+    #p_steps represents a parameter for the amount of steps we want executed
     def step(self, p_steps):
         default_reverse = self.m_reverse
 
@@ -352,8 +363,8 @@ class Stepper_Gesture():
         self.m_stepper_drive1 = p_stepper_drive1
         self.m_stepper_drive2 = p_stepper_drive2
         self.m_update_speed = p_update_speed
-        self.m_x_steps = 0
-        self.m_z_steps = 0
+        self.m_x_steps = 0 #initial value
+        self.m_z_steps = 0 #initial value
 
         # constants
         self.m_c_STEPPER_MAX_STEPS = 1024
@@ -406,11 +417,12 @@ class Stepper_Gesture():
             time.sleep(self.m_update_speed)
 
 # ----------------------------------------------------------------------------- #
-# by:           Marco Tan, Emily Attai
+# by:           Marco Tan (tanm27, 400433483)
+#               Emily Attai (attaie, 400452653)
 # last updated: 2023-02-25
 # description:  code for vibration motor and vibration activation
 
-# wrapper class to play buzzer patterns
+# wrapper class to play buzzer patterns to alert user of positions that are out of bounds
 class Buzzer_Wrapper():
     def __init__(self, p_buzzer_pin):
         self.m_buzzer = Buzzer(p_buzzer_pin)
@@ -489,7 +501,7 @@ class Vibration():
 
 # ----------------------------------------------------------------------------- #
 
-# global objects b/c of threading
+# global objects b/c of threading so that these values can be accessed by all functions and  threads 
 orientation = Orientation(p_alpha=0.9, p_window_size=10, p_round=2)
 gestures = Gestures(p_config_file="config.json", p_gesture_window_time=1.0)
 
@@ -501,7 +513,7 @@ vibration = Vibration(p_buzzer_pin=14, p_loop_delay=5.0)
 
 # ----------------------------------------------------------------------------- #
 
-# fn to help with parsing xyz data (you will see)
+# function to help with parsing xyz data (you will see)
 def xyz_list_parse(p_xyz):
     return_val = [0.0, 0.0, 0.0]
 
@@ -514,7 +526,7 @@ def xyz_list_parse(p_xyz):
 
     return return_val
 
-# fn to print statuses to console
+# function to print statuses to console
 def console_output_fn():
     # constants
     COLUMN_WIDTH = 18
@@ -601,7 +613,7 @@ def main():
     global stepper_ctrl
     global vibration
 
-    # get gesture from orientation sensor data, send to stepper and vibration
+    # get gesture from orientation sensor data, send to stepper and vibration functions
     while True:
         gestures.set_xyz(p_xyz=orientation.get_ema())
         stepper_ctrl.set_head_position(p_head_position=gestures.get())
