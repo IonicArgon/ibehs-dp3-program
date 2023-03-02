@@ -40,6 +40,7 @@ import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------------- #
 # by:           Marco Tan (tanm27, 400433483)
 #               Emily Attai (attaie, 400452653)
+#               Team 25
 # last updated: 2023-02-25
 # description:  reusable code for exponential moving average
 class EMA:
