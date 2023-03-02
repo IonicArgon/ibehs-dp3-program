@@ -669,7 +669,7 @@ def main():
         ax[2].scatter(range(len(raw_z)), raw_z)
 
         # update plot
-        fig.draw()
+        fig.canvas.draw_idle()
         plt.pause(MAIN_DELAY)
         fig.clf()
 
