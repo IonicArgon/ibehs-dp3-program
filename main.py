@@ -610,7 +610,7 @@ def console_output_fn():
 # main function
 def main():
     # constants
-    MAIN_DELAY = 0.1
+    MAIN_DELAY = 0.01
     
     # start console output thread
     console_output_thread = threading.Thread(target=console_output_fn)
@@ -629,7 +629,7 @@ def main():
 
     # align plot to upper right corner
     manager = plt.get_current_fig_manager()
-    manager.window.setGeometry(1000, 0, 800, 1000)
+    manager.window.setGeometry(1000, 0, 900, 1000)
 
     # for storing our orientation data
     PLOT_SIZE = 20
