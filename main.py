@@ -314,7 +314,7 @@ class Stepper_Driver():
 
     def get_steps(self):
         return self.m_steps
-    #p_steps represents a parameter for the amount of steps we want executed
+    
     def step(self, p_steps):
         default_reverse = self.m_reverse
 
