@@ -1,9 +1,3 @@
-# ----------------------------------------------------------------------------- #
-# by:           Marco Tan (tanm27, 400433483)
-#               Emily Attai (attaie, 400452653)
-# last updated: 2023-02-25
-# description:  reusable code for exponential moving average
-
 # package imports
 import threading
 import time
@@ -13,8 +7,6 @@ import RPi.GPIO as GPIO # type: ignore[import]
 from sensor_library import Orientation_Sensor
 from enum import IntEnum
 from gpiozero import Buzzer
-from collections import deque
-import matplotlib.pyplot as plt
 
 # note from the programmers:
 # 
@@ -32,15 +24,10 @@ import matplotlib.pyplot as plt
 # p.s.2: you will have to run the code in console; IDLE does not support
 #        multithreading and will not work. we have tested the code on a raspberry
 #        pi 4 and it works fine. use python version 3.9.x or higher.
-#
-# required packages:
-#   - matplotlib
-#   - gpiozero
 
 # ----------------------------------------------------------------------------- #
-# by:           Marco Tan (tanm27, 400433483)
-#               Emily Attai (attaie, 400452653)
-#               Team 25
+# by:           Marco Tan, Emily Attai
+# Team 25 
 # last updated: 2023-02-25
 # description:  reusable code for exponential moving average
 class EMA:
@@ -58,7 +45,7 @@ class EMA:
     def set_alpha(self, p_alpha):
         self.m_alpha = p_alpha
 
-    # set window size (the window size is the number of data points used to
+    # set window size (note: the window size is the number of data points used to
     # calculate the average)
     def set_window_size(self, p_window_size):
         self.m_window_size = p_window_size
@@ -77,14 +64,15 @@ class EMA:
             return
         else:
             self.m_window.pop(0)
-        #calculating the average of the window 
+            
+        #function to calculate window average 
         window_avg = round(sum(self.m_window) / self.m_window_size, self.m_round)
         self.m_out = self.m_alpha * window_avg + (1 - self.m_alpha) * self.m_last_out
         self.m_last_out = self.m_out
 
 # ----------------------------------------------------------------------------- #
-# by:           Marco Tan (tanm27, 400433483)
-#               Emily Attai (attaie, 400452653)
+# by:           Marco Tan, Emily Attai
+# Team 25 
 # last updated: 2023-02-25
 # description:  reading orientation sensor and outputting smoothed data
 
@@ -100,7 +88,6 @@ class Orientation():
         self.m_raw = [None, None, None]
         self.m_ema_out = [None, None, None]
 
-        # for threading of internal values (because we want concurrent updating)
         self.thread_ema_update = threading.Thread(target=self.update)
         self.thread_ema_update.daemon = True
         self.thread_ema_update.start()
@@ -134,8 +121,8 @@ class Orientation():
             time.sleep(0.1)
 
 # ----------------------------------------------------------------------------- #
-# by:           Marco Tan (tanm27, 400433483)
-#               Emily Attai (attaie, 400452653)
+# by:           Marco Tan, Emily Attai
+# Team 25 
 # last updated: 2023-02-25
 # description:  code to detect gestures from orientation xyz data
 
@@ -150,7 +137,7 @@ class Head_Position(IntEnum):
 # class to detect gestures from orientation xyz data
 class Gestures():
     def __init__(self, p_config_file, p_gesture_window_time):
-        # configurations
+        # configerations
         self.m_gestures = {}
         self.m_gesture_window_len = p_gesture_window_time
 
@@ -164,7 +151,7 @@ class Gestures():
                 self.m_gestures[gestureEnum] = gestures[i]
                 del self.m_gestures[gestureEnum]["__enum__"]
 
-        # internal values (default/placeholder  values)
+        # internal values
         self.m_head_position = Head_Position.MOVE_STOP
         self.m_internal_orientation = {}
         self.m_internal_xyz = [0, 0, 0]
@@ -194,7 +181,7 @@ class Gestures():
         return self.m_head_position
     
     # must convert to strings for output to console because python 
-    # print enums as numbers, not strings
+    # print enums as strings, but as integers
     def get_status(self):
         if self.m_head_position == Head_Position.MOVE_FORWARD:
             return "FORWARD"
@@ -228,7 +215,7 @@ class Gestures():
                         self.m_largest_direction_xyz[i] = math.copysign(1, vector)
                         self.m_prev_vector = vector
 
-                # scan through possible gestures and see if any changes in the head position are detected
+                # scan through possible gestures and see if any are detected
                 for i in self.m_gestures:
                     gesture = self.m_gestures[i]
 
@@ -248,7 +235,7 @@ class Gestures():
                     else:
                         threshold_test = (vector < gesture["threshold"])
                     
-                    # if both tests pass, then gesture is detected and processed
+                    # if both tests pass, then gesture is detected
                     if direction_test and threshold_test:
                         # increment once on new falling edge
                         if self.m_count == 0:
@@ -273,7 +260,7 @@ class Gestures():
             # set the default position in case no gesture is detected
             self.m_head_position = Head_Position.MOVE_STOP
 
-            # scan through possible gestures that we set to see which one is detected
+            # scan through possible gestures to see which one is detected
             for i in self.m_gestures:
                 if self.m_internal_orientation == None:
                     break
@@ -289,8 +276,7 @@ class Gestures():
             time.sleep(0.1)
 
 # ----------------------------------------------------------------------------- #
-# by:           Marco Tan (tanm27, 400433483)
-#               Emily Attai (attaie, 400452653)
+# by:           Marco Tan, Emily Attai
 # last updated: 2023-02-25
 # description:  code for stepper motors and stepper activation
 
@@ -370,8 +356,8 @@ class Stepper_Gesture():
         self.m_stepper_drive1 = p_stepper_drive1
         self.m_stepper_drive2 = p_stepper_drive2
         self.m_update_speed = p_update_speed
-        self.m_x_steps = 0 #initial value
-        self.m_z_steps = 0 #initial value
+        self.m_x_steps = 0
+        self.m_z_steps = 0
 
         # constants
         self.m_c_STEPPER_MAX_STEPS = 1024
@@ -424,12 +410,11 @@ class Stepper_Gesture():
             time.sleep(self.m_update_speed)
 
 # ----------------------------------------------------------------------------- #
-# by:           Marco Tan (tanm27, 400433483)
-#               Emily Attai (attaie, 400452653)
+# by:           Marco Tan, Emily Attai
 # last updated: 2023-02-25
 # description:  code for vibration motor and vibration activation
 
-# wrapper class to play buzzer patterns to alert user of positions that are out of bounds
+# wrapper class to play buzzer patterns
 class Buzzer_Wrapper():
     def __init__(self, p_buzzer_pin):
         self.m_buzzer = Buzzer(p_buzzer_pin)
@@ -508,7 +493,7 @@ class Vibration():
 
 # ----------------------------------------------------------------------------- #
 
-# global objects b/c of threading so that these values can be accessed by all functions and  threads 
+# global objects b/c of threading
 orientation = Orientation(p_alpha=0.9, p_window_size=10, p_round=2)
 gestures = Gestures(p_config_file="config.json", p_gesture_window_time=1.0)
 
@@ -520,7 +505,7 @@ vibration = Vibration(p_buzzer_pin=14, p_loop_delay=5.0)
 
 # ----------------------------------------------------------------------------- #
 
-# function to help with parsing xyz data (you will see)
+# fn to help with parsing xyz data (you will see)
 def xyz_list_parse(p_xyz):
     return_val = [0.0, 0.0, 0.0]
 
@@ -533,7 +518,7 @@ def xyz_list_parse(p_xyz):
 
     return return_val
 
-# function to print statuses to console
+# fn to print statuses to console
 def console_output_fn():
     # constants
     COLUMN_WIDTH = 18
@@ -601,8 +586,6 @@ def console_output_fn():
                        f'{vibration_now:^{COLUMN_WIDTH}}|'
         print(outputString)
         header_counter += 1
-
-        # pause to allow plot to update
         time.sleep(PRINT_DELAY)
 
 # ----------------------------------------------------------------------------- #
@@ -610,7 +593,7 @@ def console_output_fn():
 # main function
 def main():
     # constants
-    MAIN_DELAY = 0.01
+    MAIN_DELAY = 0.1
     
     # start console output thread
     console_output_thread = threading.Thread(target=console_output_fn)
@@ -622,82 +605,12 @@ def main():
     global stepper_ctrl
     global vibration
 
-    # setting up matplotlib because graphs are cool
-    fig, ax = plt.subplots(3, 1)
-    fig.suptitle("Orientation Sensor Data")
-    fig.tight_layout()
-
-    # align plot to upper right corner
-    manager = plt.get_current_fig_manager()
-    manager.window.setGeometry(1000, 0, 900, 1000)
-
-    # for storing our orientation data
-    PLOT_SIZE = 20
-
-    raw_x = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
-    raw_y = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
-    raw_z = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
-
-    ema_x = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
-    ema_y = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
-    ema_z = deque([0.0] * PLOT_SIZE, maxlen=PLOT_SIZE)
-
-    # get gesture from orientation sensor data, send to stepper and vibration functions
+    # get gesture from orientation sensor data, send to stepper and vibration
     while True:
         gestures.set_xyz(p_xyz=orientation.get_ema())
         stepper_ctrl.set_head_position(p_head_position=gestures.get())
         vibration.set_head_position(p_head_position=gestures.get())
-
-        # update all data
-        raw_x.append(orientation.get_raw()[0])
-        raw_y.append(orientation.get_raw()[1])
-        raw_z.append(orientation.get_raw()[2])
-
-        ema_x.append(orientation.get_ema()[0])
-        ema_y.append(orientation.get_ema()[1])
-        ema_z.append(orientation.get_ema()[2])
-
-        # plot raw x and ema x data
-        ax[0].plot(ema_x, label="Smoothed")
-        ax[0].scatter(range(len(ema_x)), ema_x)
-        ax[0].plot(raw_x, label="Raw")
-        ax[0].scatter(range(len(raw_x)), raw_x)
-        ax[0].legend()
-
-        # plot raw y and ema y data
-        ax[1].plot(ema_y, label="Smoothed")
-        ax[1].scatter(range(len(ema_y)), ema_y)
-        ax[1].plot(raw_y, label="Raw")
-        ax[1].scatter(range(len(raw_y)), raw_y)
-        ax[1].legend()
-
-        # plot raw z and ema z data
-        ax[2].plot(ema_z, label="Smoothed")
-        ax[2].scatter(range(len(ema_z)), ema_z)
-        ax[2].plot(raw_z, label="Raw")
-        ax[2].scatter(range(len(raw_z)), raw_z)
-        ax[2].legend()
-
-        # setting axis labels and titles    
-        ax[0].set_title("X Axis")
-        ax[0].set_xticks([])
-        ax[0].set_ylabel("Degrees (°)")
-
-        ax[1].set_title("Y Axis")
-        ax[1].set_xticks([])
-        ax[1].set_ylabel("Degrees (°)")
-
-        ax[2].set_title("Z Axis")
-        ax[2].set_xticks([])
-        ax[2].set_ylabel("Degrees (°)")
-
-        # update plot
-        fig.canvas.draw_idle()
-        plt.pause(MAIN_DELAY)
-        ax[0].clear()
-        ax[1].clear()
-        ax[2].clear()
-
+        time.sleep(MAIN_DELAY)
 
 if __name__ == "__main__":
     print("We recommend setting your terminal to full screen to see the data better.")
