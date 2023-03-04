@@ -1,6 +1,7 @@
 # ----------------------------------------------------------------------------- #
 # by:           Marco Tan (tanm27, 400433483)
 #               Emily Attai (attaie, 400452653)
+# Team 25
 # last updated: 2023-02-25
 # description:  reusable code for exponential moving average
 
@@ -42,7 +43,7 @@ import matplotlib.pyplot as plt
 #               Emily Attai (attaie, 400452653)
 #               Team 25
 # last updated: 2023-02-25
-# description:  reusable code for exponential moving average
+# description:  reusable code for exponential moving/rolling average (EMA) 
 class EMA:
     def __init__(self, p_alpha, p_window_size, p_round):
         self.m_alpha = p_alpha
@@ -68,7 +69,7 @@ class EMA:
 
     # update the EMA with a new data point
     def update(self, p_in):
-        # make sure our number is always a float
+        # makes sure the value is always a float
         self.m_window.append(float(p_in or 0.0))
 
         # if we have not reached the window size yet, return None
@@ -77,14 +78,15 @@ class EMA:
             return
         else:
             self.m_window.pop(0)
-        #calculating the average of the window 
-        window_avg = round(sum(self.m_window) / self.m_window_size, self.m_round)
+         
+        window_avg = round(sum(self.m_window) / self.m_window_size, self.m_round) #calculating the average of the window
         self.m_out = self.m_alpha * window_avg + (1 - self.m_alpha) * self.m_last_out
-        self.m_last_out = self.m_out
+        self.m_last_out = self.m_out #represents the last outputted value 
 
 # ----------------------------------------------------------------------------- #
 # by:           Marco Tan (tanm27, 400433483)
 #               Emily Attai (attaie, 400452653)
+# Team 25 
 # last updated: 2023-02-25
 # description:  reading orientation sensor and outputting smoothed data
 
@@ -136,8 +138,9 @@ class Orientation():
 # ----------------------------------------------------------------------------- #
 # by:           Marco Tan (tanm27, 400433483)
 #               Emily Attai (attaie, 400452653)
+# Team 25 
 # last updated: 2023-02-25
-# description:  code to detect gestures from orientation xyz data
+# description:  code to detect gestures from orientation sensor's xyz data
 
 # enum class for gestures make code more readable (vs. using numbers)
 class Head_Position(IntEnum):
@@ -164,7 +167,7 @@ class Gestures():
                 self.m_gestures[gestureEnum] = gestures[i]
                 del self.m_gestures[gestureEnum]["__enum__"]
 
-        # internal values (default/placeholder  values)
+        # internal values (default/placeholder values)
         self.m_head_position = Head_Position.MOVE_STOP
         self.m_internal_orientation = {}
         self.m_internal_xyz = [0, 0, 0]
@@ -172,13 +175,13 @@ class Gestures():
         self.m_prev_vector = 0
         self.m_count = 0
 
-        # for threading of internal values (because we want concurrent updating)
+        # to initialize threading of internal values (because we want concurrent updating)
         self.m_update_internal_thread = threading.Thread(target=self.update_internal_values)
         self.m_update_internal_thread.daemon = True
         self.m_update_internal_thread_running = False
         self.m_update_internal_thread.start()
 
-        # for threading of gesture output
+        # to initialize threading of gesture output
         self.m_update_gesture_thread = threading.Thread(target=self.update_gesture_output)
         self.m_update_gesture_thread.daemon = True
         self.m_update_gesture_thread_running = True
@@ -194,7 +197,7 @@ class Gestures():
         return self.m_head_position
     
     # must convert to strings for output to console because python 
-    # print enums as numbers, not strings
+    # prints enums as numbers, not strings
     def get_status(self):
         if self.m_head_position == Head_Position.MOVE_FORWARD:
             return "FORWARD"
@@ -291,6 +294,7 @@ class Gestures():
 # ----------------------------------------------------------------------------- #
 # by:           Marco Tan (tanm27, 400433483)
 #               Emily Attai (attaie, 400452653)
+# Team 25 
 # last updated: 2023-02-25
 # description:  code for stepper motors and stepper activation
 
@@ -426,10 +430,11 @@ class Stepper_Gesture():
 # ----------------------------------------------------------------------------- #
 # by:           Marco Tan (tanm27, 400433483)
 #               Emily Attai (attaie, 400452653)
+# Team 25
 # last updated: 2023-02-25
 # description:  code for vibration motor and vibration activation
 
-# wrapper class to play buzzer patterns to alert user of positions that are out of bounds
+# wrapper class to play buzzer patterns to alert user which direction they are going in 
 class Buzzer_Wrapper():
     def __init__(self, p_buzzer_pin):
         self.m_buzzer = Buzzer(p_buzzer_pin)
@@ -447,8 +452,11 @@ class Buzzer_Wrapper():
         self.m_buzzer.off()
 
     # wowee we can play morse code now, isn't that cool?
+    # this is iterating through the string and reading through each character
+    # based on the character, will output a buzzer pattern
+    
     def play_pattern(self, p_pattern):
-        for char in p_pattern:
+        for char in p_pattern:  
             if char in ".-":
                 self.m_buzzer.on()
                 time.sleep(self.m_c_BUZZER_PATTERNS[char])
@@ -508,7 +516,7 @@ class Vibration():
 
 # ----------------------------------------------------------------------------- #
 
-# global objects b/c of threading so that these values can be accessed by all functions and  threads 
+# global objects b/c of threading so that these values can be accessed by all functions and threads 
 orientation = Orientation(p_alpha=0.9, p_window_size=10, p_round=2)
 gestures = Gestures(p_config_file="config.json", p_gesture_window_time=1.0)
 
@@ -524,11 +532,11 @@ vibration = Vibration(p_buzzer_pin=14, p_loop_delay=5.0)
 def xyz_list_parse(p_xyz):
     return_val = [0.0, 0.0, 0.0]
 
-    # check if all numbers
+    # to check if the values are numbers and if they are, it will be added to the return list (if not a number, will stay 0)
     if all(isinstance(n, (int, float)) for n in p_xyz):
         return_val = p_xyz
     
-    # round to 1 decimal place
+    # round the returned value to user to 1 decimal place
     return_val = [round(n, 1) for n in return_val]
 
     return return_val
@@ -554,6 +562,7 @@ def console_output_fn():
                 f'{" ":^{COLUMN_WIDTH}}|'
     header_counter = 0
 
+    #calling global objects to be used in code below 
     global orientation
     global gestures
     global stepper_ctrl
@@ -572,7 +581,7 @@ def console_output_fn():
                 print("-", end="")
             print()
 
-        # get data
+        # geting data all into the moving graph in regards to "time" (more so relative changes, not exactly real time)
         time_now = time.strftime("%H:%M:%S", time.localtime())
 
         xyz_ema = orientation.get_ema()
@@ -606,6 +615,9 @@ def console_output_fn():
         time.sleep(PRINT_DELAY)
 
 # ----------------------------------------------------------------------------- #
+# by:           Marco Tan (tanm27, 400433483)
+#               Emily Attai (attaie, 400452653)
+# Team 25
 
 # main function
 def main():
